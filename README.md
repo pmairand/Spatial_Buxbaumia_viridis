@@ -87,8 +87,6 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
  
 - [`spatstat`](https://spatstat.org/) - point pattern analysis (PCF, MCF, PPM)
 - [`R-INLA`](https://www.r-inla.org/) - Bayesian spatial modelling
-- [`inlabru`](https://inlabru-org.github.io/inlabru/) - LGCP and SPDE modelling
-- [`tidyverse`](https://www.tidyverse.org/) - data manipulation and visualisation
 
  
 ## Key references
