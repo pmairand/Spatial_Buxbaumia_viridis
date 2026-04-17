@@ -31,6 +31,7 @@ Four forest plots in the **Massif Central, France** (sites M2, M3, M4, M5), cove
  
 - **Pair Correlation Function (PCF)** : quantifies spatial aggregation of deadwood substrates relative to complete spatial randomness (CSR). Values g(r) > 1 indicate aggregation at scale r.
 - **Mark Connection Function (MCF)** : estimates the probability that two substrates at distance r are both colonised by *B. viridis*, under a random labelling null hypothesis. Departures above the simulation envelope indicate clustering of colonised substrates independent of the underlying CWD distribution.
+
 ### Point Process Models — PPM / KPPM
  
 Inhomogeneous Poisson Point Process Models (PPM) fitted by maximum likelihood with three spatially continuous covariates:
@@ -52,7 +53,7 @@ $$\log \lambda_1(s) = \mu_1 + w_1(s)$$
  
 **Process 2 — Binomial model** for *B. viridis* colonisation probability:
  
-$$\text{logit}(p_i) = \alpha + \beta_{\text{diam}} \cdot \text{diam}_i + \beta_{\text{smax}} \cdot \text{S\_MAX}_i + \beta_{\text{ess}} \cdot [\text{conifer}] + \beta_{\text{sup}} \cdot [\text{stump}] + \beta_s \cdot w_1(s_i) + w_2(s_i)$$
+$$\text{logit}(p_i) = \alpha + \beta_{\text{diam}} \cdot \text{diam}_i + \beta_{\text{smax}} \cdot S\_MAX_i + \beta_{\text{ess}} \cdot [\text{conifer}] + \beta_{\text{sup}} \cdot [\text{stump}] + \beta_s \cdot w_1(s_i) + w_2(s_i)$$
 
 The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood density independently favour colonisation once individual substrate covariates are accounted for. Penalized Complexity (PC) priors were placed on spatial field hyperparameters to ensure model identifiability.
  
