@@ -1,7 +1,7 @@
 # Role of dispersal and microhabitat on the spatial distribution of a coarse wood-associated moss at the local scale
  
 **Master Thesis — Paul Mairand**  
-Office National des Forêts (ONF) — 2025
+Office National des Forêts (ONF) - 2025
 
  
 ## Study species
@@ -13,7 +13,7 @@ Office National des Forêts (ONF) — 2025
  
 Most existing studies on *B. viridis* have focused on chorological distribution or habitat niche modelling at broad spatial scales. This study addresses a gap in the literature by investigating the **fine-scale spatial structure** of the species within individual forest plots in the Massif Central (France).
  
-The core question is: **does *B. viridis* simply follow the deadwood resource, or does it exhibit independent spatial processes** (dispersal limitation, conspecific facilitation) that shape its colonisation pattern beyond what microhabitat quality alone can predict?
+The core question is : **does *B. viridis* simply follow the deadwood resource, or does it exhibit independent spatial processes** (dispersal limitation, conspecific facilitation) that shape its colonisation pattern beyond what microhabitat quality alone can predict?
 
  
 ## Study area
