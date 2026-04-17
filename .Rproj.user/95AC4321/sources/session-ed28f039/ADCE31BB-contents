@@ -1,0 +1,91 @@
+# -----------------------------------------------------------------------------
+# MCF_function : Mark Connection Function under random labelling
+# -----------------------------------------------------------------------------
+# Computes or imports a MCF envelope for a given site under the random labelling
+# hypothesis, then plots the pres-pres connection function.
+#
+# Arguments:
+#   s : site name (e.g. "M2")
+#   recalculate : if TRUE, recomputes and saves the envelope ;
+#                 if FALSE, imports the previously saved .rds file
+#   correction : edge correction method passed to envelope()
+#   nsim : number of simulations for the envelope
+#   nrank : rank of the envelope, i.e. number of simulations ignored on
+#                 each side to build the CI
+#   save_plot : saving plots in Figures folder
+#
+# Returns a list with
+#   $MCF : the envelope object
+#   $file  : path to the .rds file
+#   $ppp_name : name of the ppp object used
+#
+# Details:
+#   The null hypothesis is random labelling, simulated via rlabel(X).
+#   Only the pres-pres connection (i = "pres", j = "pres") is computed,
+#   reflecting the probability that two points at distance r are both presences.
+# -----------------------------------------------------------------------------
+
+MCF_function <- function(s,
+                         recalculate = FALSE,
+                         correction = "best",
+                         nsim = 199,
+                         nrank = 5,
+                         save_plot = FALSE) {
+  # Get ppp object
+  ppp_name <- paste0(s, "_ppp")
+  X <- get(ppp_name, envir = .GlobalEnv)
+
+  # File path
+  fp_MCF <- file.path(paste0("00_Data/03_Results/02_MCF_CSR/", ppp_name, ".rds"))
+
+  # Recalculate or import
+  if (recalculate) {
+    message("Calculating MCF CSR for ", ppp_name)
+    sim_expr <- expression(rlabel(X))
+    MCF <- envelope(X,
+      fun = markconnect, i = "pres", j = "pres",
+      correction = correction, nsim = nsim, nrank = nrank,
+      normalise = TRUE,
+      simulate = sim_expr, data = list(X = X)
+    )
+    saveRDS(MCF, fp_MCF)
+  } else {
+    message("Importing MCF CSR from :\n", fp_MCF)
+    MCF <- readRDS(fp_MCF)
+  }
+
+  # Convert envelope to dataframe for ggplot
+  mcf_df <- as.data.frame(MCF)
+
+  p <- ggplot(mcf_df, aes(x = r)) +
+    geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey70", alpha = 0.6) +
+    geom_line(aes(y = obs), color = "darkorange", linewidth = 0.7) +
+    geom_line(aes(y = mmean), color = "red", linetype = "dashed", linewidth = 0.6) +
+    ylim(0, max(mcf_df$obs, mcf_df$hi, na.rm = TRUE) * 1.1) +
+    theme_bw() +
+    labs(
+      title = paste0("MCF CSR - ", s),
+      x = "r",
+      y = "p(i,j)(r)",
+      color = NULL
+    ) +
+    annotate("text",
+      x = max(mcf_df$r) * 0.85,
+      y = max(mcf_df$hi, na.rm = TRUE) * 1.0,
+      label = "pres-pres", color = "darkorange", size = 3.5
+    )
+
+  print(p)
+
+  # Save plot
+  if (save_plot) {
+    output_dir <- "02_Displays/Figures/PCF_MCF"
+    ggsave(
+      filename = file.path(output_dir, paste0("MCF_CSR_", s, ".png")),
+      plot = p,
+      width = 8, height = 5, dpi = 300
+    )
+  }
+
+  invisible(list(MCF = MCF, file = fp_MCF, ppp_name = ppp_name))
+}

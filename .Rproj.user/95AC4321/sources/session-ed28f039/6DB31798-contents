@@ -1,0 +1,198 @@
+# -----------------------------------------------------------------------------
+# run_parallel_cv : Parallelised spatial block cross-validation
+#
+# Evaluates the predictive performance of the joint INLA model using repeated
+# spatial block holdout. At each replicate, one random point per site is drawn
+# and all substrates within a given radius are excluded from training (test set).
+# The model is re-fitted on the remaining data and predictions are made on the
+# test set using fixed effects only (no spatial field extrapolation).
+#
+# Arguments:
+#   res : output object from fun_joint_inla()
+#   n_rep : number of cross-validation replicates
+#   radius : exclusion radius in metres around the holdout point
+#   n_cores : number of parallel cores
+#   error_handling : foreach error handling -> "remove" (skip) or "pass" (return error)
+#
+# Returns a data frame with one row per valid replicate :
+#   $rep : replicate index
+#   $n_test : number of test observations
+#   $n_train : number of training observations
+#   $auc : global AUC
+#   $auc_M2 ... $auc_M5 : per-site AUC
+# -----------------------------------------------------------------------------
+run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
+                            error_handling = "remove") {
+  df_full <- res$data
+  df_full$Site <- factor(df_full$Site)
+  sites <- levels(df_full$Site)
+
+  message(paste0(
+    "Launching CV : ", n_rep, " replicates | ",
+    n_cores, " cores | radius = ", radius, " m"
+  ))
+
+  # ---------------------------------------------------------------------------
+  # 1. Cluster initialisation
+  # ---------------------------------------------------------------------------
+  cl <- makeCluster(n_cores)
+  registerDoParallel(cl)
+
+  # Explicit library loading on each worker
+  # (INLA sometimes has namespace issues in parallel environments)
+  clusterEvalQ(cl, {
+    library(INLA)
+    library(dplyr)
+    library(tidyr)
+    library(sf)
+    library(fmesher)
+    library(Matrix)
+    library(pROC)
+  })
+
+  clusterExport(cl,
+    varlist = c("fun_joint_inla", "df_full", "sites", "radius"),
+    envir = environment()
+  )
+
+  # ---------------------------------------------------------------------------
+  # 2. Parallel loop
+  # ---------------------------------------------------------------------------
+  results <- foreach(
+    i = 1:n_rep,
+    .packages = c(
+      "INLA", "dplyr", "tidyr", "pROC", "sf",
+      "fmesher", "Matrix", "ggplot2"
+    ),
+    .combine = rbind,
+    .errorhandling = error_handling
+  ) %dopar% {
+    set.seed(i)
+
+    # --- A. Random point per site + circular exclusion ----------------------
+    # One random centre is drawn per site; all points within the radius
+    # are assigned to the test set
+    idx_test_all <- c()
+
+    for (s in sites) {
+      idx_site <- which(df_full$Site == s)
+      coords_s <- as.matrix(df_full[idx_site, c("X", "Y")])
+      idx_centre <- sample(nrow(coords_s), 1)
+      x_rand <- coords_s[idx_centre, 1]
+      y_rand <- coords_s[idx_centre, 2]
+      dists <- sqrt((coords_s[, 1] - x_rand)^2 + (coords_s[, 2] - y_rand)^2)
+      idx_test_all <- c(idx_test_all, idx_site[which(dists <= radius)])
+    }
+
+    idx_train_all <- setdiff(seq_len(nrow(df_full)), idx_test_all)
+    df_train <- df_full[idx_train_all, ]
+    df_test <- df_full[idx_test_all, ]
+
+    # Minimum size checks
+    if (nrow(df_test) < 5) {
+      return(NULL)
+    }
+    if (nrow(df_train) < 100) {
+      return(NULL)
+    }
+    if (length(unique(df_test$P_Bux)) < 2) {
+      return(NULL)
+    }
+
+    # --- B. Model re-estimation on training data ----------------------------
+    res_cv <- tryCatch(
+      fun_joint_inla(
+        data = df_train,
+        max.edge = c(5, 20), cutoff = 1, offset = c(10, 30),
+        prior.range1 = c(20, 0.9), prior.sigma1 = c(1, 0.5),
+        prior.range2 = c(50, 0.5), prior.sigma2 = c(1, 0.01)
+      ),
+      error = function(e) NULL
+    )
+
+    if (is.null(res_cv)) {
+      return(NULL)
+    }
+
+    # --- C. Prediction on test set — fixed effects only ---------------------
+    # Spatial field is not extrapolated to test locations;
+    # only the fixed effect linear predictor is used
+    fe <- res_cv$inla$summary.fixed
+
+    diam_mean <- mean(df_train$Diameter, na.rm = TRUE)
+    diam_sd <- sd(df_train$Diameter, na.rm = TRUE)
+    diam_test_sc <- (df_test$Diameter - diam_mean) / diam_sd
+
+    lp_test <- fe["intercept_p2", "mean"] +
+      fe["Diam_sc", "mean"] * diam_test_sc +
+      fe["Sap_max2", "mean"] * as.integer(df_test$Sap_max == "2") +
+      fe["Sap_max3", "mean"] * as.integer(df_test$Sap_max == "3") +
+      fe["Sap_max4", "mean"] * as.integer(df_test$Sap_max == "4") +
+      fe["Sap_max5", "mean"] * as.integer(df_test$Sap_max == "5") +
+      fe["Essence_Conifer", "mean"] * as.integer(df_test$Essence == "Résineux") +
+      fe["Type_Stump", "mean"] * as.integer(df_test$Type == "Souche")
+
+    p_pred <- plogis(lp_test)
+
+    # --- D. Global AUC ------------------------------------------------------
+    auc_global <- tryCatch(
+      as.numeric(auc(roc(df_test$P_Bux, p_pred, quiet = TRUE))),
+      error = function(e) NA_real_
+    )
+
+    # --- E. Per-site AUC ----------------------------------------------------
+    auc_by_site <- sapply(sites, function(s) {
+      idx_s <- which(df_test$Site == s)
+      if (length(idx_s) < 5) {
+        return(NA_real_)
+      }
+      if (length(unique(df_test$P_Bux[idx_s])) < 2) {
+        return(NA_real_)
+      }
+      tryCatch(
+        as.numeric(auc(roc(df_test$P_Bux[idx_s], p_pred[idx_s], quiet = TRUE))),
+        error = function(e) NA_real_
+      )
+    })
+
+    # --- F. Output ----------------------------------------------------------
+    data.frame(
+      rep = i,
+      n_test = nrow(df_test),
+      n_train = nrow(df_train),
+      auc = auc_global,
+      auc_M2 = auc_by_site["M2"],
+      auc_M3 = auc_by_site["M3"],
+      auc_M4 = auc_by_site["M4"],
+      auc_M5 = auc_by_site["M5"]
+    )
+  }
+
+  stopCluster(cl)
+
+  # ---------------------------------------------------------------------------
+  # 3. Summary
+  # ---------------------------------------------------------------------------
+  if (is.null(results) || nrow(results) == 0) {
+    message("WARNING : no valid replicates — check errors with error_handling = 'pass'")
+    return(NULL)
+  }
+
+  message("\n=== Spatial cross-validation summary ===")
+  message(paste0("Valid replicates : ", nrow(results), " / ", n_rep))
+
+  cat(paste0(
+    "\nGlobal AUC\n",
+    "  Median : ", round(median(results$auc, na.rm = TRUE), 3), "\n",
+    "  95% CI : [",
+    round(quantile(results$auc, 0.025, na.rm = TRUE), 3), " — ",
+    round(quantile(results$auc, 0.975, na.rm = TRUE), 3), "]\n",
+    "\nPer-site AUC (median)\n",
+    "  M2 : ", round(median(results$auc_M2, na.rm = TRUE), 3), "\n",
+    "  M3 : ", round(median(results$auc_M3, na.rm = TRUE), 3), "\n",
+    "  M4 : ", round(median(results$auc_M4, na.rm = TRUE), 3), "\n",
+    "  M5 : ", round(median(results$auc_M5, na.rm = TRUE), 3), "\n"
+  ))
+
+  return(results)
+}

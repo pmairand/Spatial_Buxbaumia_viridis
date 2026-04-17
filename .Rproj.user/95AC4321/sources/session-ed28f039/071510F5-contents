@@ -1,0 +1,256 @@
+# -----------------------------------------------------------------------------
+# fun_inla : Binomial GLM + INLA-SPDE model with spatial random field
+# -----------------------------------------------------------------------------
+# Fits a binomial GLM and a spatial INLA model (Matérn SPDE) on
+# all sites simultaneously, using the following fixed covariates:
+#   Diam_sc, Sap_max, Type, Essence
+#
+# Arguments:
+#   data       : input data frame
+#   spat_res   : if TRUE, projects the spatial field on a grid for each site
+#
+# Returns a list with:
+#   $data      : cleaned and prepared data frame
+#   $glm       : fitted GLM object
+#   $inla      : fitted INLA object
+#   $pred      : data frame with GLM and INLA predictions
+#   $mesh_plot : function to plot the SPDE mesh
+#   $spatial   : spatial field plots (if spat_res = TRUE, else NULL)
+#   $metrics   : AIC (GLM), DIC and WAIC (INLA)
+# -----------------------------------------------------------------------------
+fun_inla <- function(data,
+                     spat_res = FALSE) {
+  covar <- c("Diam_sc", "Sap_max", "Type", "Essence")
+
+  # ---------------------------------------------------------------------------
+  # 1. Data preparation
+  # ---------------------------------------------------------------------------
+  df <- data
+  start_num <- length(df$P_Bux)
+
+  df <- df %>%
+    filter(Essence != "Indéterminé") %>%
+    mutate(
+      P_Bux = as.integer(P_Bux),
+      Site = as.factor(Site),
+      Diam_sc = as.numeric(scale(Diameter)),
+      Sap_max = as.factor(Sap_max),
+      Essence = as.factor(Essence),
+      Type = as.factor(Type)
+    )
+
+  end_num <- length(df$P_Bux)
+  perc_loss <- 100 - end_num / start_num * 100
+  message(paste0(round(perc_loss, 2), "% of points removed"))
+
+  # Site factor (M2 = reference)
+  df$Site <- relevel(df$Site, ref = "M2")
+  df$Site_id <- as.integer(df$Site)
+  n_Sites <- nlevels(df$Site)
+
+  # Local coordinates centered by site
+  df <- df %>%
+    group_by(Site) %>%
+    mutate(
+      X_loc = X - mean(X),
+      Y_loc = Y - mean(Y)
+    ) %>%
+    ungroup()
+  coords_loc <- as.matrix(df[, c("X_loc", "Y_loc")])
+
+  df$row_id <- 1:nrow(df)
+
+  # ---------------------------------------------------------------------------
+  # 2. Model formulas
+  # ---------------------------------------------------------------------------
+  rhs_formula <- paste(covar, collapse = " + ")
+  form_glm <- as.formula(paste("P_Bux ~ Site +", rhs_formula))
+  form_inla <- as.formula(paste(
+    "y ~ Site +", rhs_formula,
+    "+ f(spatial.field, model = spde,",
+    "replicate = spatial.field.repl)"
+  ))
+
+  # ---------------------------------------------------------------------------
+  # 3. GLM
+  # ---------------------------------------------------------------------------
+  glm_global <- glm(form_glm, family = binomial, data = df)
+
+  # ---------------------------------------------------------------------------
+  # 4. INLA - SPDE
+  # ---------------------------------------------------------------------------
+
+  # Mesh : INLA estimates the latent spatial field w at triangle vertices, then
+  # interpolates to observation locations. Small triangles near data (5 m max),
+  # larger ones further away (20 m) to reduce computation cost.
+  mesh <- fmesher::fm_mesh_2d_inla(
+    loc = coords_loc,
+    max.edge = c(5, 20),
+    cutoff = 1, # observations closer than 1 m are merged in the mesh
+    # to avoid overly small triangles
+    offset = c(10, 30) # mesh extension beyond observed area to avoid
+    # spatial field boundary effects
+  )
+
+  mesh_plot <- function() {
+    plot(mesh)
+    points(coords_loc, col = "red", pch = 16, cex = 0.5)
+  }
+
+  # SPDE : defines the latent Matérn Gaussian spatial field w, estimated on the
+  # mesh nodes. Models unobserved spatial structure not captured by fixed effects.
+  # Penalised complexity priors regularise the field to prevent it from
+  # absorbing too much signal (i.e. overfitting spatially).
+  spde <- inla.spde2.pcmatern(
+    mesh = mesh,
+    alpha = 2, # Matérn smoothness (alpha = 2 = classic Matérn)
+    prior.range = c(10, 0.5), # P(range < 10 m) = 0.5
+    prior.sigma = c(1, 0.01) # P(sd > 1) = 0.01 : large spatial variance is
+    # penalised to limit spatial overfitting
+  )
+
+  # Spatial field index : one replicate of the field per site
+  spatial_index <- inla.spde.make.index(
+    "spatial.field",
+    n.spde = spde$n.spde, # number of mesh nodes
+    n.repl = n_Sites # number of replicates = number of sites
+  )
+
+  # Projection matrix A : maps the spatial field defined on mesh nodes to
+  # observation locations, allowing to retrieve w(s_i) from nodal values
+  A_obs <- inla.spde.make.A(
+    mesh = mesh,
+    loc  = coords_loc,
+    repl = df$Site_id
+  )
+
+  # Stack : assembles all model components into a single object for INLA
+  # eta = fixed effects (identity matrix) + spatial field (A_obs)
+  # Two blocks of effects :
+  #   - fixed covariates directly linked to observations (A = 1, identity)
+  #   - latent spatial field parameters estimated on the mesh (A = A_obs)
+  effects_df <- df %>% select(all_of(c("Site", covar, "row_id")))
+  stack_est <- inla.stack(
+    data = list(y = df$P_Bux),
+    A = list(1, A_obs),
+    effects = list(effects_df, spatial.field = spatial_index),
+    tag = "est"
+  )
+
+  # INLA run : sequentially estimates fixed coefficients, spatial field
+  # hyperparameters (range, sigma), the field on mesh nodes, then computes
+  # predictions at observation locations.
+  # DIC and WAIC are computed as model comparison criteria (analogous to AIC).
+  res_global <- inla(
+    form_inla,
+    family = "binomial", # Y ~ Bernoulli
+    data = inla.stack.data(stack_est),
+    control.predictor = list(
+      A = inla.stack.A(stack_est), # links model to observations via A
+      compute = TRUE # stores and computes linear predictors
+    ),
+    control.compute = list(
+      dic = TRUE, # Deviance Information Criterion
+      waic = TRUE # Watanabe Akaike Information Criterion
+    )
+  )
+
+  # ---------------------------------------------------------------------------
+  # 5. Predictions
+  # ---------------------------------------------------------------------------
+  idx <- inla.stack.index(stack_est, "est")$data
+  df_glm <- model.frame(glm_global)
+  df_glm$row_id <- as.numeric(rownames(df_glm))
+  df_glm$p_glm <- predict(glm_global, type = "response")
+
+  df_inla <- data.frame(
+    row_id = df$row_id[idx],
+    p_inla = res_global$summary.fitted.values[idx, "mean"]
+  )
+
+  df_pred <- df %>%
+    inner_join(df_glm %>% select(row_id, p_glm), by = "row_id") %>%
+    inner_join(df_inla, by = "row_id")
+
+  # ---------------------------------------------------------------------------
+  # 6. Spatial field projection on a grid (optional)
+  # ---------------------------------------------------------------------------
+  spatial_out <- NULL
+
+  if (spat_res) {
+    w_mean <- res_global$summary.random$spatial.field$mean
+    plots <- list()
+
+    for (i in 1:n_Sites) {
+      df_Site <- df %>% filter(Site_id == i)
+      idx_nodes <- ((i - 1) * spde$n.spde + 1):(i * spde$n.spde)
+      w_Site <- w_mean[idx_nodes]
+
+      x_seq <- seq(min(df_Site$X) - 5, max(df_Site$X) + 5, length.out = 100)
+      y_seq <- seq(min(df_Site$Y) - 5, max(df_Site$Y) + 5, length.out = 100)
+      grid <- expand.grid(X = x_seq, Y = y_seq)
+      grid$X_loc <- grid$X - mean(df_Site$X)
+      grid$Y_loc <- grid$Y - mean(df_Site$Y)
+
+      A_pred <- inla.spde.make.A(
+        mesh = mesh,
+        loc = as.matrix(grid[, c("X_loc", "Y_loc")])
+      )
+
+      grid$spatial_only <- as.vector(A_pred %*% w_Site)
+      grid$spatial_sd <- as.vector(A_pred %*%
+        res_global$summary.random$spatial.field$sd[idx_nodes])
+
+      p_mean <- ggplot(grid, aes(X, Y, fill = spatial_only)) +
+        geom_raster() +
+        coord_equal() +
+        scale_fill_viridis_c() +
+        geom_point(
+          data = df_Site, aes(X, Y, shape = factor(P_Bux)),
+          inherit.aes = FALSE, color = "darkred", size = 1.5
+        ) +
+        labs(
+          title = paste("Spatial field - Site", unique(df_Site$Site)),
+          fill = "Mean"
+        )
+
+      p_sd <- ggplot(grid, aes(X, Y, fill = spatial_sd)) +
+        geom_raster() +
+        coord_equal() +
+        scale_fill_viridis_c(option = "magma") +
+        geom_point(
+          data = df_Site, aes(X, Y, shape = factor(P_Bux)),
+          inherit.aes = FALSE, color = "darkred", size = 1.5
+        ) +
+        labs(
+          title = paste("Spatial uncertainty - Site", unique(df_Site$Site)),
+          fill = "SD"
+        )
+
+      plots[[i]] <- list(
+        mean = p_mean,
+        sd = p_sd
+      )
+    }
+
+    spatial_out <- plots
+    names(spatial_out) <- levels(df$Site)
+  }
+
+  # ---------------------------------------------------------------------------
+  # 7. Output
+  # ---------------------------------------------------------------------------
+  return(list(
+    data = df,
+    glm = glm_global,
+    inla = res_global,
+    pred = df_pred,
+    mesh_plot = mesh_plot,
+    spatial = spatial_out,
+    metrics = list(
+      AIC = AIC(glm_global),
+      DIC = res_global$dic$dic,
+      WAIC = res_global$waic$waic
+    )
+  ))
+}

@@ -1,0 +1,491 @@
+# =============================================================================
+# fun_joint_inla.R
+# Joint INLA model : LGCP (deadwood pattern) + Binomial (Buxbaumia viridis)
+# Uncertainty propagation via shared spatial field w1
+#
+# Model architecture :
+#
+#   Process 1 — Poisson LGCP on all deadwood substrates (DW)
+#     Predictor  : η1_k(s) = μ1 + w1_k(s)
+#     Likelihood : y_node ~ Poisson(a_node * exp(η1_k(s)))
+#     where a_node = Voronoi area of the node (dual mesh integration weight),
+#     truncated at 5× the median to avoid numerical instability at peripheral
+#     nodes (Simpson et al. 2016, Krainski et al. 2018)
+#     and w1_k ~ SPDE Matern(range1, σ1), replicated per site k, sum-to-zero
+#
+#   Process 2 — Binomial on Buxbaumia viridis presence
+#     logit(p_i) = intercept_p2
+#                + β_diam  * Diameter_sc
+#                + β_smax2 * S_MAX2 + β_smax3 * S_MAX3  (ref = S_MAX1)
+#                + β_smax4 * S_MAX4 + β_smax5 * S_MAX5
+#                + β_ess   * Essence_Conifer             (ref = Broadleaf)
+#                + β_sup   * Type_Stump                  (ref = DWS)
+#                + β_s     * w1_k(s_i)   [free coupling coefficient, estimated]
+#                + w2_k(s_i)              [process-specific residual field]
+#     where w2_k ~ SPDE Matern(range2, σ2), replicated per site k
+#
+# Coupling between processes :
+#   Field w1 enters simultaneously into the LGCP (process 1) and the binomial
+#   predictor (process 2) via a freely estimated coupling coefficient β_s
+#   (R-INLA "copy" feature). If β_s > 0, areas of high DW density favour
+#   Buxbaumia presence, propagating uncertainty from process 1 into process 2
+#   without double-fitting.
+#   In this dataset, β_s ≈ 0 across all tested configurations : local DW
+#   density has no detectable effect on Buxbaumia presence once individual
+#   covariates and residual autocorrelation are controlled for
+#   (see prior sensitivity analysis).
+#
+# Fixed effects handling :
+#   Categorical covariates (S_MAX, Essence, Type) are manually encoded as 0/1
+#   indicators to ensure correct identification of the reference level in the
+#   presence of the explicit intercept intercept_p2 and the suppression of the
+#   global intercept (-1 in the INLA formula).
+#   Essence "Indeterminate" is excluded from the data (3.7% of observations).
+#
+# Model identifiability :
+#   Without constraints on w1, both fields spontaneously converge towards the
+#   same spatial scale (~80 m), creating competition that renders the model
+#   non-identifiable. The PC prior on the range of w1 (P(range < 20 m) = 0.9)
+#   cleanly separates the two processes : w1 operates at ~5 m (local DW
+#   clustering) and w2 at ~82 m (residual Buxbaumia autocorrelation). The
+#   robustness of fixed effects to this constraint was verified by sensitivity
+#   analysis across multiple prior configurations.
+#
+# Multi-site structure :
+#   Fields w1 and w2 are replicated across the 4 sites (M2, M3, M4, M5)
+#   via replicate = site_id. Hyperparameters (range, σ) are shared across
+#   sites but field realisations are independent per site.
+#   Coordinates are centred by site before mesh construction.
+#   Releveling of Site (ref = "M2") ensures consistent replicate ordering
+#   between w1 and w2 regardless of raw data ordering.
+#
+# References :
+#   Rue, Martino & Chopin (2009)
+#   Illian et al. (2013) Methods in Ecology and Evolution 4:305-315
+#   Lindgren, Rue & Lindstrom (2011) JRSS-B 73:423-498
+#     --> SPDE : Matern Gaussian field approximation
+#   Krainski et al. (2018) Advanced Spatial Modeling with SPDE
+#   Simpson et al. (2016) Statistical Science 32:1-29
+# =============================================================================
+
+fun_joint_inla <- function(
+  data,
+  # Mesh parameters
+  max.edge = c(5, 20),
+  cutoff = 1,
+  offset = c(10, 30),
+  # PC priors for w1 (deadwood spatial field)
+  prior.range1 = c(20, 0.9),
+  prior.sigma1 = c(1, 0.5),
+  # PC priors for w2 (residual Buxbaumia field)
+  prior.range2 = c(50, 0.5),
+  prior.sigma2 = c(1, 0.01)
+) {
+  # ---------------------------------------------------------------------------
+  # 1. Data preparation
+  # ---------------------------------------------------------------------------
+  n_obs_start <- nrow(data)
+
+  df <- data %>%
+    filter(Essence != "Indéterminé") %>%
+    mutate(
+      P_Bux = as.integer(P_Bux),
+      Site = as.factor(Site),
+      Diam_sc = as.numeric(scale(Diameter)),
+      Sap_max = as.factor(Sap_max),
+      Essence = as.factor(Essence),
+      Type = as.factor(Type)
+    )
+
+  message(paste0(
+    "N observations used : ", nrow(df),
+    " (", n_obs_start - nrow(df), " removed, ",
+    round(100 - (nrow(df) / n_obs_start * 100), 2), "%)"
+  ))
+
+  # Relevel : ensures consistent replicate ordering across w1 and w2
+  df$Site <- relevel(df$Site, ref = "M2")
+  df$Sap_max <- relevel(df$Sap_max, ref = "1")
+
+  # ---------------------------------------------------------------------------
+  # 2. Local coordinates and site indexing
+  # ---------------------------------------------------------------------------
+  df <- df %>%
+    group_by(Site) %>%
+    mutate(
+      X_loc = X - mean(X),
+      Y_loc = Y - mean(Y)
+    ) %>%
+    ungroup()
+
+  df$site_id <- as.integer(df$Site)
+  n_sites <- nlevels(df$Site)
+  coords_loc <- as.matrix(df[, c("X_loc", "Y_loc")])
+  df$row_id <- seq_len(nrow(df))
+
+  # ---------------------------------------------------------------------------
+  # 3. Shared mesh
+  # ---------------------------------------------------------------------------
+  # INLA estimates the latent spatial fields at triangle vertices, then
+  # interpolates to observation locations via the projection matrix A.
+  # Small triangles near data (max.edge[1]), larger ones further away
+  # (max.edge[2]) to reduce computation cost without losing local resolution.
+  mesh <- fm_mesh_2d_inla(
+    loc = coords_loc,
+    max.edge = max.edge,
+    cutoff = cutoff, # observations closer than cutoff metres are merged
+    # in the mesh to avoid overly small triangles
+    offset = offset # mesh extension beyond observed area to avoid
+    # spatial field boundary effects
+  )
+  n_nodes <- mesh$n
+  message(paste0("Mesh : ", n_nodes, " nodes"))
+
+  mesh_plot <- function() {
+    plot(mesh, main = "SPDE Mesh")
+    points(coords_loc, col = "red", pch = 16, cex = 0.5)
+  }
+
+  # ---------------------------------------------------------------------------
+  # 4. Dual mesh - Voronoi areas (LGCP integration weights)
+  # ---------------------------------------------------------------------------
+  # The LGCP likelihood requires integration weights a_node for each mesh node,
+  # corresponding to the Voronoi cell area of that node in the dual mesh.
+  # fm_fem() returns the FEM matrices; the diagonal of C0 gives these areas.
+  fem <- fm_fem(mesh, order = 2)
+  voronoi_areas <- diag(fem$c0)
+
+  # Peripheral mesh nodes have very large Voronoi cells (up to ~200 m²) which
+  # numerically destabilise the LGCP by pushing intercept_p1 towards -Inf.
+  # Areas are truncated at 5× the median — standard practice for LGCP via SPDE
+  # (Simpson et al. 2016, Krainski et al. 2018).
+  median_area <- median(voronoi_areas)
+  voronoi_areas <- pmin(voronoi_areas, 5 * median_area)
+
+  message(paste0(
+    "Voronoi areas : min = ", round(min(voronoi_areas), 3),
+    " m2, max = ", round(max(voronoi_areas), 3), " m2"
+  ))
+
+  # Voronoi dual mesh visualization
+  voronoi_plot <- function(site_filter = NULL) {
+    df_plot <- if (!is.null(site_filter)) df %>% filter(Site == site_filter) else df
+
+    nodes_df <- data.frame(
+      x = mesh$loc[, 1],
+      y = mesh$loc[, 2],
+      area = voronoi_areas
+    )
+    # Build triangle edge segments for mesh triangulation display
+    triangles <- mesh$graph$tv
+    segments_list <- list()
+    for (i in seq_len(nrow(triangles))) {
+      v <- triangles[i, ]
+      pts <- mesh$loc[v, 1:2]
+      segments_list[[i]] <- data.frame(
+        x = pts[c(1, 2, 3, 1), 1],
+        y = pts[c(1, 2, 3, 1), 2],
+        tri = i
+      )
+    }
+    segs_df <- do.call(rbind, segments_list)
+
+    ggplot() +
+      # Mesh triangulation edges
+      geom_path(
+        data = segs_df, aes(x = x, y = y, group = tri),
+        color = "grey80", linewidth = 0.2
+      ) +
+      # Mesh nodes coloured by Voronoi area (= integration weight)
+      geom_point(
+        data = nodes_df, aes(x = x, y = y, fill = area),
+        shape = 21, size = 2, stroke = 0.3, color = "white"
+      ) +
+      scale_fill_viridis_c(
+        option = "plasma", name = "Voronoi\narea (m²)",
+        trans = "log10"
+      ) +
+      # Observations
+      geom_point(
+        data = df_plot, aes(x = X_loc, y = Y_loc, shape = factor(P_Bux)),
+        color = "#1D9E75", size = 1.8, stroke = 0.8
+      ) +
+      scale_shape_manual(
+        values = c("0" = 1, "1" = 16),
+        labels = c("0" = "Absent", "1" = "Present"),
+        name = "Buxbaumia"
+      ) +
+      coord_equal() +
+      labs(
+        title = paste0(
+          "Triangulation and Voronoi weights",
+          if (!is.null(site_filter)) paste0(" — ", site_filter) else " — all sites"
+        ),
+        subtitle = paste0(
+          n_nodes, " nodes | min = ", round(min(voronoi_areas), 1),
+          " m² | max = ", round(max(voronoi_areas), 1), " m²"
+        ),
+        x = "X (m, centred)", y = "Y (m, centred)"
+      ) +
+      theme_minimal() +
+      theme(panel.grid = element_blank(), strip.text = element_blank())
+  }
+
+  # ---------------------------------------------------------------------------
+  # 5. SPDE - two distinct spatial fields
+  # ---------------------------------------------------------------------------
+  # w1 : latent spatial field for the deadwood point pattern (Process 1 - LGCP)
+  # sum-to-zero constraint (constr = TRUE) removes redundancy with intercept_p1
+  # by forcing the spatial field mean to zero
+  spde1 <- inla.spde2.pcmatern(
+    mesh = mesh,
+    alpha = 2, # Matérn smoothness (alpha = 2 = classic Matérn)
+    prior.range = prior.range1, # P(range < prior.range1[1] m) = prior.range1[2]
+    prior.sigma = prior.sigma1, # P(sd > prior.sigma1[1]) = prior.sigma1[2]
+    constr = TRUE # sum-to-zero constraint to avoid redundancy with intercept_p1
+  )
+
+  # w2 : residual spatial field for Buxbaumia presence (Process 2 - Binomial)
+  # No sum-to-zero constraint : the intercept_p2 handles the mean
+  spde2 <- inla.spde2.pcmatern(
+    mesh = mesh,
+    alpha = 2,
+    prior.range = prior.range2,
+    prior.sigma = prior.sigma2
+  )
+
+  # ---------------------------------------------------------------------------
+  # 6. Spatial field indexing (with replicates for multi-site)
+  # ---------------------------------------------------------------------------
+  # Each field is replicated n_sites times : hyperparameters (range, sigma) are
+  # shared across sites but field realisations are independent per site
+  idx_w1 <- inla.spde.make.index("w1", n.spde = spde1$n.spde, n.repl = n_sites)
+  idx_w2 <- inla.spde.make.index("w2", n.spde = spde2$n.spde, n.repl = n_sites)
+  idx_w1copy <- inla.spde.make.index("w1.copy", n.spde = spde1$n.spde, n.repl = n_sites)
+
+  # ---------------------------------------------------------------------------
+  # 7. INLA stack construction
+  #
+  # Joint response architecture :
+  #   - Mesh node rows : y_lgcp = 0 (count), y_binom = NA
+  #   - Observation rows : y_lgcp = NA,       y_binom = P_Bux
+  # ---------------------------------------------------------------------------
+
+  # --- 7a. LGCP stack (Process 1) ---
+  # One row per mesh node × site.
+  # y_lgcp = 0 everywhere; the latent field + Voronoi offset drives the intensity.
+  # E = Voronoi area is passed as exposure (INLA internally uses log(E) as offset).
+  n_nodes_total <- n_nodes * n_sites
+
+  # Block-diagonal A matrix : identity block per site
+  A_lgcp <- Matrix::bdiag(lapply(seq_len(n_sites), function(k) Matrix::Diagonal(n = n_nodes)))
+
+  # Voronoi exposure weights, repeated per site
+  E_lgcp <- rep(voronoi_areas, n_sites)
+
+  effects_lgcp <- list(
+    data.frame(intercept_p1 = rep(1, n_nodes_total)),
+    w1 = idx_w1
+  )
+
+  y_lgcp_resp <- cbind(
+    y_lgcp = rep(0L, n_nodes_total),
+    y_binom = rep(NA_integer_, n_nodes_total)
+  )
+
+  stack_lgcp <- inla.stack(
+    data = list(y_joint = y_lgcp_resp, E_vec = E_lgcp),
+    A = list(1, A_lgcp),
+    effects = effects_lgcp,
+    tag = "lgcp"
+  )
+
+  # --- 7b. Binomial stack (Process 2) ---
+  # One row per observation.
+  # Two A matrices are needed : one for w1.copy (coupling), one for w2 (residual).
+  # R-INLA requires w1.copy to be explicitly present in the stack with its own
+  # indices for the "copy" feature to work correctly.
+  A_obs_shared <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
+  A_obs_w2 <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
+
+  # Manual dummy encoding for categorical covariates.
+  # Required to ensure correct reference level identification in the presence
+  # of an explicit intercept (intercept_p2) and suppressed global intercept (-1).
+  effects_p2_df <- df %>%
+    mutate(
+      # Sap_max indicators — reference = level 1
+      Sap_max2 = as.integer(Sap_max == "2"),
+      Sap_max3 = as.integer(Sap_max == "3"),
+      Sap_max4 = as.integer(Sap_max == "4"),
+      Sap_max5 = as.integer(Sap_max == "5"),
+      # Essence indicator — reference = Broadleaf
+      Essence_Conifer = as.integer(Essence == "Résineux"),
+      # Type indicator — reference = CWD (absent)
+      Type_Stump = as.integer(Type == "Souche"),
+      # Explicit intercept for Process 2
+      intercept_p2 = 1
+    ) %>%
+    select(
+      intercept_p2, Diam_sc,
+      Sap_max2, Sap_max3, Sap_max4, Sap_max5,
+      Essence_Conifer, Type_Stump
+    )
+
+  y_binom_resp <- cbind(
+    y_lgcp = rep(NA_integer_, nrow(df)),
+    y_binom = df$P_Bux
+  )
+
+  stack_binom <- inla.stack(
+    data = list(y_joint = y_binom_resp, E_vec = rep(NA_real_, nrow(df))),
+    # Three effect blocks :
+    #   1. Fixed covariates linked directly to observations (A = 1, identity)
+    #   2. w1.copy : copied deadwood field, enters predictor scaled by β_s
+    #   3. w2      : residual Buxbaumia spatial field
+    A = list(1, A_obs_shared, A_obs_w2),
+    effects = list(effects_p2_df,
+      w1.copy = idx_w1copy,
+      w2 = idx_w2
+    ),
+    tag = "binom"
+  )
+
+  # --- 7c. Combined stack ---
+  stack_joint <- inla.stack.join(stack_lgcp, stack_binom)
+
+  # ---------------------------------------------------------------------------
+  # 8. Joint model formula
+  #
+  # Coupling β_s is implemented via R-INLA "copy" feature :
+  #   f(w1.copy, copy = "w1", hyper = list(beta = list(fixed = FALSE)))
+  # INLA estimates β_s freely while sharing the w1 field between processes.
+  # fixed = FALSE means β_s is estimated (not fixed to 1).
+  # Prior N(0,1) on β_s encodes the assumption of weak/null coupling a priori.
+  # ---------------------------------------------------------------------------
+  fixed_terms_p2 <- names(effects_p2_df)
+  fixed_rhs_p2 <- paste(fixed_terms_p2, collapse = " + ")
+
+  formula_joint <- as.formula(paste0(
+    "y_joint ~ -1", # global intercept suppressed (explicit intercepts used)
+    " + intercept_p1", # intercept for Process 1 (LGCP)
+    " + ", fixed_rhs_p2, # all fixed effects for Process 2
+    " + f(w1, model = spde1, replicate = w1.repl)", # w1 : LGCP spatial field
+    " + f(w1.copy, copy = 'w1', replicate = w1.copy.repl,", # w1 copy scaled by β_s
+    "     hyper = list(beta = list(fixed = FALSE,",
+    "                              prior = 'normal',",
+    "                              param = c(0, 1))))",
+    " + f(w2, model = spde2, replicate = w2.repl)" # w2 : residual Buxbaumia field
+  ))
+
+  message("Joint model formula :")
+  print(formula_joint)
+
+  # ---------------------------------------------------------------------------
+  # 9. Data preparation for inla()
+  #
+  # For a joint model with two families, INLA expects :
+  #   - y_joint  : N×2 matrix (col 1 = Poisson, col 2 = Binomial)
+  #   - E_vec    : exposure vector (Voronoi areas for Poisson, 1 for Binomial)
+  #   - Ntrials  : number of trials (1 for Binomial, NA for Poisson)
+  # ---------------------------------------------------------------------------
+  dat_inla <- inla.stack.data(stack_joint)
+  A_joint <- inla.stack.A(stack_joint)
+
+  # Ntrials : 1 for binomial observations, NA for LGCP nodes
+  Ntrials_vec <- dat_inla$y_joint[, 2]
+  Ntrials_vec[!is.na(Ntrials_vec)] <- 1L
+
+  # E_vec : Voronoi areas for LGCP nodes; 1 for binomial rows
+  # (INLA requires numeric values for E — NA not allowed, 1 is the standard convention)
+  E_vec <- dat_inla$E_vec
+  E_vec[is.na(E_vec)] <- 1
+
+  # ---------------------------------------------------------------------------
+  # 10. INLA run
+  # ---------------------------------------------------------------------------
+  message("Running INLA...")
+
+  res_joint <- inla(
+    formula_joint,
+    family = c("poisson", "binomial"),
+    data = inla.stack.data(stack_joint),
+    E = E_vec,
+    Ntrials = Ntrials_vec,
+    control.predictor = list(A = A_joint, compute = TRUE),
+    control.compute = list(
+      dic = TRUE,
+      waic = TRUE,
+      cpo = TRUE,
+      config = TRUE
+    ), # for posterior sampling
+    control.inla = list(
+      int.strategy = "eb" # empirical Bayes for speed; use "ccd" for higher accuracy
+    ),
+    verbose = FALSE
+  )
+
+  message("INLA done.")
+  message(paste0("DIC  = ", round(res_joint$dic$dic, 2)))
+  message(paste0("WAIC = ", round(res_joint$waic$waic, 2)))
+
+  # ---------------------------------------------------------------------------
+  # 11. Predictions at observation locations (Process 2)
+  # ---------------------------------------------------------------------------
+  idx_binom <- inla.stack.index(stack_joint, "binom")$data
+
+  df_pred <- df %>%
+    mutate(
+      p_buxbaumia = res_joint$summary.fitted.values[idx_binom, "mean"],
+      p_bux_q025 = res_joint$summary.fitted.values[idx_binom, "0.025quant"],
+      p_bux_q975 = res_joint$summary.fitted.values[idx_binom, "0.975quant"]
+    )
+
+  # ---------------------------------------------------------------------------
+  # 12. Coupling coefficient β_s extraction
+  # ---------------------------------------------------------------------------
+  # β_s is stored in summary.hyperpar under "Beta for w1.copy"
+  beta_s_summary <- tryCatch(
+    res_joint$summary.hyperpar[
+      grep("Beta for w1", rownames(res_joint$summary.hyperpar)),
+    ],
+    error = function(e) NULL
+  )
+
+  if (!is.null(beta_s_summary)) {
+    message(paste0(
+      "β_s (DW → Buxbaumia coupling) : mean = ", round(beta_s_summary$mean, 4),
+      ", 95% CI [", round(beta_s_summary$`0.025quant`, 4),
+      ", ", round(beta_s_summary$`0.975quant`, 4), "]"
+    ))
+  }
+
+  # ---------------------------------------------------------------------------
+  # 13. Output
+  # ---------------------------------------------------------------------------
+  return(list(
+    # Prepared data
+    data = df,
+
+    # Raw INLA output
+    inla = res_joint,
+
+    # Predictions at observation locations (Process 2)
+    pred = df_pred,
+
+    # Coupling coefficient β_s
+    beta_s = beta_s_summary,
+
+    # Mesh and dual mesh
+    mesh = mesh,
+    mesh_plot = mesh_plot,
+    voronoi_plot = voronoi_plot,
+    voronoi_areas = voronoi_areas,
+
+    # Model comparison metrics
+    metrics = list(
+      DIC = res_joint$dic$dic,
+      WAIC = res_joint$waic$waic,
+      CPO = -mean(log(res_joint$cpo$cpo[idx_binom]), na.rm = TRUE)
+    )
+  ))
+}
