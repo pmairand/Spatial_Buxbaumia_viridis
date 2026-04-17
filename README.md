@@ -52,7 +52,7 @@ $$\log \lambda_1(s) = \mu_1 + w_1(s)$$
  
 **Process 2 — Binomial model** for *B. viridis* colonisation probability:
  
-$$logit(pᵢ) = α + β_diam·diamᵢ + β_smax·S_MAXᵢ + β_ess·[conifer] + β_sup·[stump] + βs·w₁(sᵢ) + w₂(sᵢ)$$
+$$\text{logit}(p_i) = \alpha + \beta_{\text{diam}} \cdot \text{diam}_i + \beta_{\text{smax}} \cdot S\_MAX_i + \beta_{\text{ess}} \cdot [\text{conifer}] + \beta_{\text{sup}} \cdot [\text{stump}] + \beta_s \cdot w_1(s_i) + w_2(s_i)$$
 
 The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood density independently favour colonisation once individual substrate covariates are accounted for. Penalized Complexity (PC) priors were placed on spatial field hyperparameters to ensure model identifiability.
  
