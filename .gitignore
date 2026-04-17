@@ -1,5 +1,5 @@
-01_Statistics/01_Statistics/00_Data/
-01_Statistics/04_Quarto/*.html
+01_Statistics/00_Data/
 .Rproj.user/
 *.pper
 *.json
+renv/
