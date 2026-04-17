@@ -1,0 +1,931 @@
+---
+title: "Buxbaumia viridis : effects of wood substrate and spatial patterns"
+author: "Paul MAIRAND"
+format: 
+  html:
+    scrollable: true
+    self-contained: true
+    toc: true
+    toc-location: left
+    html-sanitize: false
+---
+
+<https://essicolo.github.io/ecologie-mathematique-R/chapitre-git.html>
+
+# Context
+
+**The main objective of this work is to determine the distribution of *Buxbaumia viridis* in the Massif Central mountain range (France).**
+
+::: {style="text-align: justify"}
+The green shield-moss (*Buxbaumia viridis*) is one of the few bryophytes protected in France and Europe (Habitats Directive, Annex II (92/43/EEC) ; Bern Convention, Annex I ; ECCB 1995 (VU)). This calls for special attention to the management of this species in forest management projects. The need for a global understanding of its ecology to help decision-making has led to a series of research studies conducted since the 2000s.
+:::
+
+![](../02_Displays/Figures/B_viridis_publications.png){fig-align="center"}
+
+## Ecology and distribution of *Buxbaumia viridis*
+
+#### Chorological distribution and geographic scope
+
+::: {style="text-align: justify"}
+*Buxbaumia viridis* has a circumpolar distribution in the Northern hemisphere, extending from Asia to North America and Europe (Offerhaus et al., 2019). In Europe, its range is fragmented, extending from southern Scandinavia to the southern mountain ranges (Infante and Heras, 2018). Recent papers indicate that its distribution ranges and abundances have been underestimated, likely due to the underdetection of the gametophyte (Brewczyński et al., 2021).
+
+In France, the species is found in all major mountain ranges. The discovery of populations consisting solely of gametophytes has significantly expanded its known range to lowland region, sometimes at elevations as low as 10 meters (Huggonot et al., 2023).
+:::
+
+#### Ecology at the macrohabitat scale
+
+::: {style="text-align: justify"}
+The species is sciaphilous and hygrophilous, restricted to coniferous forests (spruce and fir-beech forests) in the montane and subalpine zones. The optimal altitudinal range in France is between 900 and 1,600 m, although it can reach 2,000 m in the Alps (Offerhaus et al., 2019). Canopy structure is a determining factor : the species prefers dense forest cover (canopy closure between \~70 and 85%) (Spitale and Mair, 2017). The probability of occurrence increases significantly with basal area : a minimum threshold of \~30 m²/ha, which is favorable for maintaining sufficient humidity and shade (Vottier and Vallée, 2017). However, moderate canopy openness is thought to promote sporophyte development, likely due to morning dew deposits (Guillet et al., 2021). On a larger spatial scale, atmospheric humidity, which depends on elevation, northness, and proximity to watercourses, is a key factor for the species (Brewczyński et al., 2021).
+:::
+
+#### Microhabitat-scale ecology and substrate preferences
+
+::: {style="text-align: justify"}
+*B. viridis* is a saprolignicolous moss that colonizes coarse wood debris (CWD) on the ground, and occasionally stumps. Conifers are the predominant hosts, but certain deciduous species (beech, willow) are colonized less frequently (Brewczyński et al., 2021). The species is a pioneer on debarked wood but requires an advanced stage of decomposition : the wood must be soft enough to absorb water (Guillet et al., 2021 ; Offerhaus et al., 2019). The size of the CWD is not always a limiting factor. Sporophytic populations are often associated with large CWD, while the protonemal stage frequently occupies short pieces of wood with small diameters. A site may have a high probability of *B.viridis* occurrence starting from a minimum threshold of CWD volume (necromass) of \~50 m³/ha (Spitale and Mair, 2017).
+:::
+
+#### Spatial specificity of the life cycle
+
+::: {style="text-align: justify"}
+The study of *B. viridis* is complicated by the separation of its two life stages. The sporophyte stage has been studied much more extensively because it is much easier to observe to the naked eye. The sporophyte is visible only when climatic conditions allow for fruiting (cold, wet autumn). Being restricted to old-growth, high-altitude forests, it has a smaller spatial distribution than the gametophyte (Guillet et al., 2021). The gametophytic stage has a broader ecological range and can persist in habitats considered suboptimal (plains, deciduous forests, drier areas) without ever producing sporophytes. The presence of gemmae allows for prolonged local survival even after periods of drought (Hugonnot et al., 2023 ; Deme and Csiky, 2021).
+:::
+
+#### Spatial dynamics and dispersal
+
+::: {style="text-align: justify"}
+This species appears to be limited more by its dispersal capabilities than by habitat availability. Although wind accounts for some spore transport, long-distance dispersal and dispersal within closed forest canopies likely depend on biotic vectors. Small mammals and birds may act as potential vectors, although rodents are also predators that consume the capsules before they mature (Kropik et al., 2020). Herbivory by slugs (Arion sp.) may also constitute a significant mortality factor (Infante and Heras, 2018).
+:::
+
+#### Impacts of forest management
+
+::: {style="text-align: justify"}
+Silvicultural management directly influences the species’ spatial distribution by altering the microclimate and the stock of CWD. Logging is not necessarily a threat if it maintains a sufficient volume of CWD and avoids clear-cutting, which dries out the habitat (Offerhaus et al., 2019). For example, Vottier and Vallée (2017) showed that proximity to forest roads does not negatively impact the presence or abundance of sporophytes, provided that suitable substrates are not destroyed during logging operations. Most studies conclude that effective conservation of *B.viridis* requires spatial and temporal continuity of decomposing substrates within forest stands (Kropik et al., 2020 ; Puntillo and Puntillo, 2024).
+:::
+
+## Bibliographic hole and objectives of the study
+
+::: {style="text-align: justify"}
+Most studies have focused on chorology or niche models. This literature suggests that *B.viridis* simply follows the resource as long as climatic conditions are favorable and there is a sufficient amount of CWD. However, Kropik et al. (2020) note that suitable habitats remain unoccupied, suggesting that dispersal is a limiting factor. To date, no research has been conducted on the fine-scale spatial structure of this moss within a single forest plot. The objective of this work is to conduct such research in order to distinguish between the resource pattern and the colonization pattern (*Buxbaumia* specific spatial processes). This study aims to distinguish between potential niche and realized niche, in order to understand how the species colonizes the available space. To do this, we have access to spatialized data that enables point pattern analysis.
+:::
+
+::: {.callout-note title="Title idea"}
+***Role of dispersal and microhabitat on the spatial distribution of a coarse wood-associated moss at the local scale.***
+:::
+
+## Concept map
+
+::: {.callout-note title="NB"}
+*To be updated, in English*
+:::
+
+![](images/clipboard-3446924970.png){fig-align="center"}
+
+# Data collection
+
+::: {.callout-note title="NB"}
+*To be Completed*
+:::
+
+# Data Structure & Management
+
+::: {.callout-note title="NB"}
+*To be Completed*
+:::
+
+# Analysis
+
+## Exploratory analysis
+
+::: {style="text-align: justify"}
+The spatial structure of deadwood substrates and their colonisation by *Buxbaumia viridis* was investigated using two second-order statistics. The Pair Correlation Function (PCF) quantifies the relative density of point pairs separated by a distance r, compared to a complete spatial randomness (CSR) distribution ; values of g(r) \> 1 indicate spatial aggregation at scale r, and g(r) = 1 is randomness. The Mark Connection Function (MCF) estimates the probability that two points at distance r both show a given mark (here, colonisation by B. viridis –\>pres-pres) under a random labelling null hypothesis. Departures above the simulation envelope therefore indicate that colonised substrates are spatially clustered independently of the underlying CWD distribution.
+:::
+
+```{=html}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <img src="../02_Displays/Figures/PCF_MCF/PCF_CSR_M2.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/MCF_CSR_M2.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/PCF_CSR_M3.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/MCF_CSR_M3.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/PCF_CSR_M4.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/MCF_CSR_M4.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/PCF_CSR_M5.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/PCF_MCF/MCF_CSR_M5.png" style="width:100%"/>
+</div>
+```
+
+::: {style="text-align: justify"}
+**Results :** PCF profiles were strikingly consistent across all four study sites : g(r) reached very high values at short distances (r \< 2–3 m), well above the simulation envelope, before rapidly converging to unity beyond r ≈ 5–10 m, indicating strong but spatially confined aggregation of deadwood at the metric scale, likely driven by the localised occurrence of decaying trees or branch falls.
+
+MCF results, however, varied markedly among sites and tracked closely with overall colonisation rates. At sites with low occupancy (M2, 7%; M5, 6%), the pres-pres MCF curve remained within the simulation envelope across all distances, providing no evidence of non-random spatial clustering of colonised substrates beyond that expected by chance. At M4 (8%), a moderate positive departure was detected at intermediate distances (r ≈ 5–15 m), suggesting a perceptible tendency toward aggregation. By contrast, at M3 (the most heavily colonised site (22%)), the MCF curve exceeded the envelope at short distances and remained elevated throughout, revealing a strong and statistically significant aggregation of colonised substrates. Taken together, these results indicate that the spatial clustering of B. viridis occurrences is not merely a by-product of deadwood distribution, but reflects an independent aggregative process. This signal is consistent with short-distance spore dispersal, local source effects, or fine-scale environmental filtering, but seems to be rare or hard to detect (have to be carefull here, n=4).
+:::
+
+## PPM / KPPM
+
+::: {style="text-align: justify"}
+Colonisation intensity was modelled across the four study sites using inhomogeneous Poisson point process models (PPM) fitted by maximum likelihood, with log-linear effects of three spatially continuous covariates: local deadwood density weighted by diameter at a 10 m bandwidth (dens10), smoothed local altitude (alt), and substrate saproxylation stage (sap).
+:::
+
+$$\log \lambda(u) = \beta_0 + \beta_1 \cdot \text{dens10}(u) + \beta_2 \cdot \text{alt}(u) + \beta_3 \cdot \text{sap}(u)$$
+
+::: {style="text-align: justify"}
+To test whether residual spatial clustering remained after accounting for environmental heterogeneity, an inhomogeneous Matérn cluster process (KPPM) was additionally fitted at each site and compared to the simpler Poisson model using cluster strength diagnostics provided by spatstat.
+:::
+
+$$\text{MatClust}(\kappa, R) \quad \text{with} \quad \kappa = \text{density of cluster centers}, \; R = \text{cluster radius}$$
+
+::: {style="text-align: justify"}
+**Results :** Substrate saproxylation was the dominant and most consistent driver of colonisation intensity across all four sites, with large positive coefficients ranging from β = 1.60 (M3) to β = 2.67 (M5), all highly significant (p \< 0.001), confirming that *B. viridis* colonisation is strongly concentrated on the most decomposed substrates regardless of site. Local deadwood density showed a weaker but consistently positive and significant effect at all sites (β = 0.21–0.51, p \< 0.05), suggesting that substrate availability at the neighbourhood scale contributes independently of substrate quality. The effect of local altitude was more variable: positive and significant at M2 (β = 0.70, p \< 0.01) and M3 (β = 0.28, p \< 0.001), but non-significant at M4 and M5 (β ≈ -0.002 and β = -0.40 respectively), indicating that fine-scale topographic moisture gradients may modulate colonisation at some sites but are not a general driver across the study area. The Matérn cluster KPPM did not improve upon the Poisson fit at any of the four sites : cluster strength indices were negligible (mean sibling probability \< 10⁻⁹) and spatstat explicitly flagged the Poisson process as the better model in all cases. This indicates that, once spatial variation in saproxylation, deadwood density, and altitude is accounted for, no residual aggregation of colonised substrates remains. The spatial pattern of *B. viridis* at these sites is fully explained by environmental filtering, with no detectable signature of dispersal-driven contagion or positive conspecific interactions.
+:::
+
+```{=html}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <img src="../02_Displays/Tables/results_ppm_M2M3.png" style="width:100%"/>
+  <img src="../02_Displays/Tables/results_ppm_M4M5.png" style="width:100%"/>
+</div>
+```
+
+::: {style="text-align: justify"}
+**Limits :** One important limitation of this modelling approach concerns the inclusion of local deadwood density (dens10) as a covariate. Because colonised substrates are themselves deadwood, a positive effect of dens10 on colonisation intensity is to some extent tautological : areas with more deadwood will mechanically contain more colonised deadwood, regardless of any biological preference. This confounding by availability means that the dens10 effect cannot be straightforwardly interpreted as a genuine driver of colonisation probability at the substrate level. The dens10 effect reported here should therefore be interpreted with caution, as a descriptor of the spatial co-occurrence of *B. viridis* and deadwood accumulation zones rather than as evidence of a causal effect of substrate density on colonisation probability.
+
+Moreover, PPMs do not take into account categorical variables such as most of the support variables we have. For this PPM, spatially continuous interpolation of inherently discrete variables was required. This method is very imprecise and widely criticized in literature.
+:::
+
+## Joint INLA model
+### Methods
+
+::: {style="text-align: justify"}
+The Bayesian model directly addresses this confounding issue by modelling colonisation as a Bernoulli outcome at the individual substrate level that is : given that a deadwood piece is present, what is the probability that it is colonised by *B. viridis*?
+
+This formulation conditions on substrate availability by design. Furthermore, the Bayesian framework implemented in INLA offers a treatment of uncertainty propagation : rather than producing point estimates with asymptotic standard errors, INLA computes the full posterior distribution of each parameter, naturally integrating uncertainty across all levels of the model without relying on large-sample approximations. This is valuable in the present context, where sample sizes vary substantially across sites and colonisation rates are low, making frequentist confidence intervals potentially unreliable. The posterior distributions obtained for each covariate effect thus reflect genuine inferential uncertainty given the data, and credible intervals can be interpreted.
+:::
+
+::: {style="text-align: justify"}
+To jointly model the spatial distribution of CWD and the colonisation probability of *Buxbaumia viridis*, we implemented a joint latent Gaussian model fitted using INLA (Integrated Nested Laplace Approximation ; Rue et al., 2009) combined with the SPDE approach (Lindgren et al., 2011). The model couples two processes through a shared spatial random field, allowing uncertainty from the first process to propagate into the second without double-fitting.
+:::
+
+::: {style="text-align: justify"}
+**Process 1 — Log-Gaussian Cox Process (LGCP) for deadwood distribution.** The spatial distribution of all deadwood substrates was modelled as an inhomogeneous Poisson process on the continuous domain, with log-intensity :
+:::
+
+$$\log \lambda_1(s) = \mu_1 + w_1(s)$$
+
+::: {style="text-align: justify"}
+where $\mu_1$ is a global intercept and $w_1(s)$ is a zero-mean Matérn Gaussian random field (SPDE approximation, $\alpha = 2$) capturing the latent spatial structure of CWD clustering. Integration weights were computed from the Voronoi dual mesh areas, capped at five times their median to ensure numerical stability of peripheral nodes (Simpson et al., 2016 ; Krainski et al., 2018). The field $w_1$ was replicated independently across the four study sites, with shared hyperparameters (range $\rho_1$, marginal standard deviation $\sigma_1$).
+:::
+
+::: {style="text-align: justify"}
+**Process 2 — Binomial model for *B. viridis* colonisation.** Colonisation probability at each substrate $i$ was modelled as:
+:::
+
+$$
+\begin{aligned}
+\text{logit}(p_i) = \, & \alpha + \beta_{\text{diam}} \cdot \text{diam}_i 
++ \sum_{k=2}^{5} \beta_{S_k} \cdot \mathbf{1}[S\_MAX_i = k] \\
+& + \beta_{\text{ess}} \cdot \mathbf{1}[\text{conifer}] 
++ \beta_{\text{sup}} \cdot \mathbf{1}[\text{stump}] 
++ \beta_s \cdot w_1(s_i) + w_2(s_i)
+\end{aligned}
+$$
+
+::: {style="text-align: justify"}
+where $\alpha$ is an intercept; $\text{diam}_i$ is the standardised substrate diameter; $S\_MAX$ is the saproxylation stage (reference = stage 1); $\beta_{\text{ess}}$ and $\beta_{\text{sup}}$ are contrasts for conifer substrates (reference = deciduous) and stumps (reference = logs), respectively. The term $\beta_s \cdot w_1(s_i)$ is the coupling term : the shared field $w_1$, estimated in Process 1, enters Process 2 multiplied by a freely estimated coefficient $\beta_s$, implemented via the copy functionality of R-INLA. If $\beta_s > 0$, areas of high deadwood density positively influence colonisation probability, while $\beta_s \approx 0$ indicates that colonisation is independent of deadwood spatial structure once individual substrate covariates are controlled. This coupling propagates uncertainty from Process 1 into Process 2. Finally, $w_2(s_i)$ is an independent residual spatial field capturing remaining autocorrelation in *B. viridis* occurrence after accounting for all covariates and the shared field.
+:::
+
+::: {style="text-align: justify"}
+**Spatial fields and priors :** Both fields $w_1$ and $w_2$ were approximated using the SPDE approach on a common triangulated mesh (max edge = 5 m inner / 20 m outer, cutoff = 1 m), and replicated across sites. Penalized Complexity (PC) priors were placed on their range and marginal standard deviation. For $w_1$, the range prior was set to $P(\rho_1 < 20\text{ m}) = 0.9$, reflecting the expectation that deadwood clustering operates at the local scale of tree falls (a few metres), and preventing competition with $w_2$ which could otherwise converge to the same spatial scale and render the joint model non-identifiable. For $w_2$, a weakly informative prior was used ($P(\rho_2 < 50\text{ m}) = 0.5$), allowing the data to freely estimate the residual autocorrelation range. The robustness of fixed-effect estimates to prior specification was assessed through a sensitivity analysis across multiple prior configurations, which confirmed the stability of Process 2 coefficients.
+:::
+
+::: {style="text-align: justify"}
+**INLA joint model function code**
+:::
+
+```{r}
+#| code-fold: true
+#| eval: false
+# =============================================================================
+# fun_joint_inla.R
+# Joint INLA model : LGCP (deadwood pattern) + Binomial (Buxbaumia viridis)
+# Uncertainty propagation via shared spatial field w1
+#
+# Model architecture :
+#
+#   Process 1 — Poisson LGCP on all deadwood substrates (DW)
+#     Predictor  : η1_k(s) = μ1 + w1_k(s)
+#     Likelihood : y_node ~ Poisson(a_node * exp(η1_k(s)))
+#     where a_node = Voronoi area of the node (dual mesh integration weight),
+#     truncated at 5× the median to avoid numerical instability at peripheral
+#     nodes (Simpson et al. 2016, Krainski et al. 2018)
+#     and w1_k ~ SPDE Matern(range1, σ1), replicated per site k, sum-to-zero
+#
+#   Process 2 — Binomial on Buxbaumia viridis presence
+#     logit(p_i) = intercept_p2
+#                + β_diam  * Diameter_sc
+#                + β_smax2 * S_MAX2 + β_smax3 * S_MAX3  (ref = S_MAX1)
+#                + β_smax4 * S_MAX4 + β_smax5 * S_MAX5
+#                + β_ess   * Essence_Conifer             (ref = Broadleaf)
+#                + β_sup   * Type_Stump                  (ref = DWS)
+#                + β_s     * w1_k(s_i)   [free coupling coefficient, estimated]
+#                + w2_k(s_i)              [process-specific residual field]
+#     where w2_k ~ SPDE Matern(range2, σ2), replicated per site k
+#
+# Coupling between processes :
+#   Field w1 enters simultaneously into the LGCP (process 1) and the binomial
+#   predictor (process 2) via a freely estimated coupling coefficient β_s
+#   (R-INLA "copy" feature). If β_s > 0, areas of high DW density favour
+#   Buxbaumia presence, propagating uncertainty from process 1 into process 2
+#   without double-fitting.
+#   In this dataset, β_s ≈ 0 across all tested configurations : local DW
+#   density has no detectable effect on Buxbaumia presence once individual
+#   covariates and residual autocorrelation are controlled for
+#   (see prior sensitivity analysis).
+#
+# Fixed effects handling :
+#   Categorical covariates (S_MAX, Essence, Type) are manually encoded as 0/1
+#   indicators to ensure correct identification of the reference level in the
+#   presence of the explicit intercept intercept_p2 and the suppression of the
+#   global intercept (-1 in the INLA formula).
+#   Essence "Indeterminate" is excluded from the data (3.7% of observations).
+#
+# Model identifiability :
+#   Without constraints on w1, both fields spontaneously converge towards the
+#   same spatial scale (~80 m), creating competition that renders the model
+#   non-identifiable. The PC prior on the range of w1 (P(range < 20 m) = 0.9)
+#   cleanly separates the two processes : w1 operates at ~5 m (local DW
+#   clustering) and w2 at ~82 m (residual Buxbaumia autocorrelation). The
+#   robustness of fixed effects to this constraint was verified by sensitivity
+#   analysis across multiple prior configurations.
+#
+# Multi-site structure :
+#   Fields w1 and w2 are replicated across the 4 sites (M2, M3, M4, M5)
+#   via replicate = site_id. Hyperparameters (range, σ) are shared across
+#   sites but field realisations are independent per site.
+#   Coordinates are centred by site before mesh construction.
+#   Releveling of Site (ref = "M2") ensures consistent replicate ordering
+#   between w1 and w2 regardless of raw data ordering.
+#
+# References :
+#   Rue, Martino & Chopin (2009)
+#   Illian et al. (2013) Methods in Ecology and Evolution 4:305-315
+#   Lindgren, Rue & Lindstrom (2011) JRSS-B 73:423-498
+#     --> SPDE : Matern Gaussian field approximation
+#   Krainski et al. (2018) Advanced Spatial Modeling with SPDE
+#   Simpson et al. (2016) Statistical Science 32:1-29
+# =============================================================================
+
+fun_joint_inla <- function(
+    data,
+    # Mesh parameters
+    max.edge = c(5, 20),
+    cutoff = 1,
+    offset = c(10, 30),
+    # PC priors for w1 (deadwood spatial field)
+    prior.range1 = c(20, 0.9),
+    prior.sigma1 = c(1, 0.5),
+    # PC priors for w2 (residual Buxbaumia field)
+    prior.range2 = c(50, 0.5),
+    prior.sigma2 = c(1, 0.01)
+) {
+  
+  # ---------------------------------------------------------------------------
+  # 1. Data preparation
+  # ---------------------------------------------------------------------------
+  n_obs_start <- nrow(data)
+  
+  df <- data %>%
+    filter(Essence != "Indéterminé") %>%
+    mutate(
+      P_Bux = as.integer(P_Bux),
+      Site = as.factor(Site),
+      Diam_sc = as.numeric(scale(Diameter)),
+      Sap_max = as.factor(Sap_max),
+      Essence = as.factor(Essence),
+      Type = as.factor(Type)
+    )
+  
+  message(paste0("N observations used : ", nrow(df),
+                 " (", n_obs_start - nrow(df), " removed, ",
+                 round(100 - (nrow(df) / n_obs_start * 100), 2), "%)"))
+  
+  # Relevel : ensures consistent replicate ordering across w1 and w2
+  df$Site <- relevel(df$Site, ref = "M2")
+  df$Sap_max <- relevel(df$Sap_max, ref = "1")
+  
+  # ---------------------------------------------------------------------------
+  # 2. Local coordinates and site indexing
+  # ---------------------------------------------------------------------------
+  df <- df %>%
+    group_by(Site) %>%
+    mutate(
+      X_loc = X - mean(X),
+      Y_loc = Y - mean(Y)
+    ) %>%
+    ungroup()
+  
+  df$site_id <- as.integer(df$Site)
+  n_sites <- nlevels(df$Site)
+  coords_loc <- as.matrix(df[, c("X_loc", "Y_loc")])
+  df$row_id <- seq_len(nrow(df))
+  
+  # ---------------------------------------------------------------------------
+  # 3. Shared mesh
+  # ---------------------------------------------------------------------------
+  # INLA estimates the latent spatial fields at triangle vertices, then
+  # interpolates to observation locations via the projection matrix A.
+  # Small triangles near data (max.edge[1]), larger ones further away
+  # (max.edge[2]) to reduce computation cost without losing local resolution.
+  mesh <- fm_mesh_2d_inla(
+    loc = coords_loc,
+    max.edge = max.edge,
+    cutoff = cutoff, # observations closer than cutoff metres are merged
+                     # in the mesh to avoid overly small triangles
+    offset = offset # mesh extension beyond observed area to avoid
+                    # spatial field boundary effects
+  )
+  n_nodes <- mesh$n
+  message(paste0("Mesh : ", n_nodes, " nodes"))
+  
+  mesh_plot <- function() {
+    plot(mesh, main = "SPDE Mesh")
+    points(coords_loc, col = "red", pch = 16, cex = 0.5)
+  }
+  
+  # ---------------------------------------------------------------------------
+  # 4. Dual mesh - Voronoi areas (LGCP integration weights)
+  # ---------------------------------------------------------------------------
+  # The LGCP likelihood requires integration weights a_node for each mesh node,
+  # corresponding to the Voronoi cell area of that node in the dual mesh.
+  # fm_fem() returns the FEM matrices; the diagonal of C0 gives these areas.
+  fem <- fm_fem(mesh, order = 2)
+  voronoi_areas <- diag(fem$c0)
+  
+  # Peripheral mesh nodes have very large Voronoi cells (up to ~200 m²) which
+  # numerically destabilise the LGCP by pushing intercept_p1 towards -Inf.
+  # Areas are truncated at 5× the median — standard practice for LGCP via SPDE
+  # (Simpson et al. 2016, Krainski et al. 2018).
+  median_area <- median(voronoi_areas)
+  voronoi_areas <- pmin(voronoi_areas, 5 * median_area)
+  
+  message(paste0("Voronoi areas : min = ", round(min(voronoi_areas), 3),
+                 " m2, max = ", round(max(voronoi_areas), 3), " m2"))
+  
+  # Voronoi dual mesh visualization
+  voronoi_plot <- function(site_filter = NULL) {
+    df_plot <- if (!is.null(site_filter)) df %>% filter(Site == site_filter) else df
+    
+    nodes_df <- data.frame(x = mesh$loc[, 1],
+                           y = mesh$loc[, 2],
+                           area = voronoi_areas)
+    # Build triangle edge segments for mesh triangulation display
+    triangles     <- mesh$graph$tv
+    segments_list <- list()
+    for (i in seq_len(nrow(triangles))) {
+      v <- triangles[i, ]
+      pts <- mesh$loc[v, 1:2]
+      segments_list[[i]] <- data.frame(x = pts[c(1,2,3,1), 1],
+                                       y = pts[c(1,2,3,1), 2],
+                                       tri = i)
+    }
+    segs_df <- do.call(rbind, segments_list)
+    
+    ggplot() +
+      # Mesh triangulation edges
+      geom_path(data = segs_df, aes(x = x, y = y, group = tri),
+                color = "grey80", linewidth = 0.2) +
+      # Mesh nodes coloured by Voronoi area (= integration weight)
+      geom_point(data = nodes_df, aes(x = x, y = y, fill = area),
+                 shape = 21, size = 2, stroke = 0.3, color = "white") +
+      scale_fill_viridis_c(option = "plasma", name = "Voronoi\narea (m²)",
+                           trans = "log10") +
+      # Observations
+      geom_point(data = df_plot, aes(x = X_loc, y = Y_loc, shape = factor(P_Bux)),
+                 color = "#1D9E75", size = 1.8, stroke = 0.8) +
+      scale_shape_manual(values = c("0" = 1, "1" = 16),
+                         labels = c("0" = "Absent", "1" = "Present"),
+                         name   = "Buxbaumia") +
+      coord_equal() +
+      labs(title = paste0("Triangulation and Voronoi weights",
+                          if (!is.null(site_filter)) paste0(" — ", site_filter) else " — all sites"),
+           subtitle = paste0(n_nodes, " nodes | min = ", round(min(voronoi_areas), 1),
+                             " m² | max = ", round(max(voronoi_areas), 1), " m²"),
+           x = "X (m, centred)", y = "Y (m, centred)") +
+      theme_minimal() +
+      theme(panel.grid = element_blank(), strip.text = element_blank())
+  }
+  
+  # ---------------------------------------------------------------------------
+  # 5. SPDE - two distinct spatial fields
+  # ---------------------------------------------------------------------------
+  # w1 : latent spatial field for the deadwood point pattern (Process 1 - LGCP)
+  # sum-to-zero constraint (constr = TRUE) removes redundancy with intercept_p1
+  # by forcing the spatial field mean to zero
+  spde1 <- inla.spde2.pcmatern(
+    mesh = mesh,
+    alpha = 2, # Matérn smoothness (alpha = 2 = classic Matérn)
+    prior.range = prior.range1, # P(range < prior.range1[1] m) = prior.range1[2]
+    prior.sigma = prior.sigma1, # P(sd > prior.sigma1[1]) = prior.sigma1[2]
+    constr = TRUE  # sum-to-zero constraint to avoid redundancy with intercept_p1
+  )
+  
+  # w2 : residual spatial field for Buxbaumia presence (Process 2 - Binomial)
+  # No sum-to-zero constraint : the intercept_p2 handles the mean
+  spde2 <- inla.spde2.pcmatern(
+    mesh = mesh,
+    alpha = 2,
+    prior.range = prior.range2,
+    prior.sigma = prior.sigma2
+  )
+  
+  # ---------------------------------------------------------------------------
+  # 6. Spatial field indexing (with replicates for multi-site)
+  # ---------------------------------------------------------------------------
+  # Each field is replicated n_sites times : hyperparameters (range, sigma) are
+  # shared across sites but field realisations are independent per site
+  idx_w1 <- inla.spde.make.index("w1", n.spde = spde1$n.spde, n.repl = n_sites)
+  idx_w2 <- inla.spde.make.index("w2", n.spde = spde2$n.spde, n.repl = n_sites)
+  idx_w1copy <- inla.spde.make.index("w1.copy", n.spde = spde1$n.spde, n.repl = n_sites)
+  
+  # ---------------------------------------------------------------------------
+  # 7. INLA stack construction
+  #
+  # Joint response architecture :
+  #   - Mesh node rows : y_lgcp = 0 (count), y_binom = NA
+  #   - Observation rows : y_lgcp = NA,       y_binom = P_Bux
+  # ---------------------------------------------------------------------------
+  
+  # --- 7a. LGCP stack (Process 1) ---
+  # One row per mesh node × site.
+  # y_lgcp = 0 everywhere; the latent field + Voronoi offset drives the intensity.
+  # E = Voronoi area is passed as exposure (INLA internally uses log(E) as offset).
+  n_nodes_total <- n_nodes * n_sites
+  
+  # Block-diagonal A matrix : identity block per site
+  A_lgcp <- Matrix::bdiag(lapply(seq_len(n_sites), function(k) Matrix::Diagonal(n = n_nodes)))
+  
+  # Voronoi exposure weights, repeated per site
+  E_lgcp <- rep(voronoi_areas, n_sites)
+  
+  effects_lgcp <- list(
+    data.frame(intercept_p1 = rep(1, n_nodes_total)),
+    w1 = idx_w1
+  )
+  
+  y_lgcp_resp <- cbind(y_lgcp = rep(0L, n_nodes_total),
+                       y_binom = rep(NA_integer_, n_nodes_total))
+  
+  stack_lgcp <- inla.stack(
+    data = list(y_joint = y_lgcp_resp, E_vec = E_lgcp),
+    A = list(1, A_lgcp),
+    effects = effects_lgcp,
+    tag = "lgcp"
+  )
+  
+  # --- 7b. Binomial stack (Process 2) ---
+  # One row per observation.
+  # Two A matrices are needed : one for w1.copy (coupling), one for w2 (residual).
+  # R-INLA requires w1.copy to be explicitly present in the stack with its own
+  # indices for the "copy" feature to work correctly.
+  A_obs_shared <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
+  A_obs_w2 <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
+  
+  # Manual dummy encoding for categorical covariates.
+  # Required to ensure correct reference level identification in the presence
+  # of an explicit intercept (intercept_p2) and suppressed global intercept (-1).
+  effects_p2_df <- df %>%
+    mutate(
+      # Sap_max indicators — reference = level 1
+      Sap_max2 = as.integer(Sap_max == "2"),
+      Sap_max3 = as.integer(Sap_max == "3"),
+      Sap_max4 = as.integer(Sap_max == "4"),
+      Sap_max5 = as.integer(Sap_max == "5"),
+      # Essence indicator — reference = Broadleaf
+      Essence_Conifer = as.integer(Essence == "Résineux"),
+      # Type indicator — reference = CWD (absent)
+      Type_Stump = as.integer(Type == "Souche"),
+      # Explicit intercept for Process 2
+      intercept_p2 = 1
+    ) %>%
+    select(intercept_p2, Diam_sc,
+           Sap_max2, Sap_max3, Sap_max4, Sap_max5,
+           Essence_Conifer, Type_Stump)
+  
+  y_binom_resp <- cbind(y_lgcp  = rep(NA_integer_, nrow(df)),
+                        y_binom = df$P_Bux)
+  
+  stack_binom <- inla.stack(
+    data = list(y_joint = y_binom_resp, E_vec = rep(NA_real_, nrow(df))),
+    # Three effect blocks :
+    #   1. Fixed covariates linked directly to observations (A = 1, identity)
+    #   2. w1.copy : copied deadwood field, enters predictor scaled by β_s
+    #   3. w2      : residual Buxbaumia spatial field
+    A = list(1, A_obs_shared, A_obs_w2),
+    effects = list(effects_p2_df,
+                   w1.copy = idx_w1copy,
+                   w2 = idx_w2),
+    tag = "binom"
+  )
+  
+  # --- 7c. Combined stack ---
+  stack_joint <- inla.stack.join(stack_lgcp, stack_binom)
+  
+  # ---------------------------------------------------------------------------
+  # 8. Joint model formula
+  #
+  # Coupling β_s is implemented via R-INLA "copy" feature :
+  #   f(w1.copy, copy = "w1", hyper = list(beta = list(fixed = FALSE)))
+  # INLA estimates β_s freely while sharing the w1 field between processes.
+  # fixed = FALSE means β_s is estimated (not fixed to 1).
+  # Prior N(0,1) on β_s encodes the assumption of weak/null coupling a priori.
+  # ---------------------------------------------------------------------------
+  fixed_terms_p2 <- names(effects_p2_df)
+  fixed_rhs_p2   <- paste(fixed_terms_p2, collapse = " + ")
+  
+  formula_joint <- as.formula(paste0(
+    "y_joint ~ -1", # global intercept suppressed (explicit intercepts used)
+    " + intercept_p1", # intercept for Process 1 (LGCP)
+    " + ", fixed_rhs_p2, # all fixed effects for Process 2
+    " + f(w1, model = spde1, replicate = w1.repl)", # w1 : LGCP spatial field
+    " + f(w1.copy, copy = 'w1', replicate = w1.copy.repl,", # w1 copy scaled by β_s
+    "     hyper = list(beta = list(fixed = FALSE,",
+    "                              prior = 'normal',",
+    "                              param = c(0, 1))))",
+    " + f(w2, model = spde2, replicate = w2.repl)" # w2 : residual Buxbaumia field
+  ))
+  
+  message("Joint model formula :")
+  print(formula_joint)
+  
+  # ---------------------------------------------------------------------------
+  # 9. Data preparation for inla()
+  #
+  # For a joint model with two families, INLA expects :
+  #   - y_joint  : N×2 matrix (col 1 = Poisson, col 2 = Binomial)
+  #   - E_vec    : exposure vector (Voronoi areas for Poisson, 1 for Binomial)
+  #   - Ntrials  : number of trials (1 for Binomial, NA for Poisson)
+  # ---------------------------------------------------------------------------
+  dat_inla <- inla.stack.data(stack_joint)
+  A_joint <- inla.stack.A(stack_joint)
+  
+  # Ntrials : 1 for binomial observations, NA for LGCP nodes
+  Ntrials_vec <- dat_inla$y_joint[, 2]
+  Ntrials_vec[!is.na(Ntrials_vec)] <- 1L
+  
+  # E_vec : Voronoi areas for LGCP nodes; 1 for binomial rows
+  # (INLA requires numeric values for E — NA not allowed, 1 is the standard convention)
+  E_vec <- dat_inla$E_vec
+  E_vec[is.na(E_vec)] <- 1
+  
+  # ---------------------------------------------------------------------------
+  # 10. INLA run
+  # ---------------------------------------------------------------------------
+  message("Running INLA...")
+  
+  res_joint <- inla(
+    formula_joint,
+    family = c("poisson", "binomial"),
+    data = inla.stack.data(stack_joint),
+    E = E_vec,
+    Ntrials = Ntrials_vec,
+    control.predictor = list(A = A_joint, compute = TRUE),
+    control.compute   = list(dic = TRUE,
+                             waic = TRUE,
+                             cpo = TRUE,
+                             config = TRUE),  # for posterior sampling
+    control.inla = list(
+      int.strategy = "eb"  # empirical Bayes for speed; use "ccd" for higher accuracy
+    ),
+    verbose = FALSE
+  )
+  
+  message("INLA done.")
+  message(paste0("DIC  = ", round(res_joint$dic$dic,  2)))
+  message(paste0("WAIC = ", round(res_joint$waic$waic, 2)))
+  
+  # ---------------------------------------------------------------------------
+  # 11. Predictions at observation locations (Process 2)
+  # ---------------------------------------------------------------------------
+  idx_binom <- inla.stack.index(stack_joint, "binom")$data
+  
+  df_pred <- df %>%
+    mutate(
+      p_buxbaumia = res_joint$summary.fitted.values[idx_binom, "mean"],
+      p_bux_q025 = res_joint$summary.fitted.values[idx_binom, "0.025quant"],
+      p_bux_q975 = res_joint$summary.fitted.values[idx_binom, "0.975quant"]
+    )
+  
+  # ---------------------------------------------------------------------------
+  # 12. Coupling coefficient β_s extraction
+  # ---------------------------------------------------------------------------
+  # β_s is stored in summary.hyperpar under "Beta for w1.copy"
+  beta_s_summary <- tryCatch(
+    res_joint$summary.hyperpar[
+      grep("Beta for w1", rownames(res_joint$summary.hyperpar)), ],
+    error = function(e) NULL
+  )
+  
+  if (!is.null(beta_s_summary)) {
+    message(paste0(
+      "β_s (DW → Buxbaumia coupling) : mean = ", round(beta_s_summary$mean, 4),
+      ", 95% CI [", round(beta_s_summary$`0.025quant`, 4),
+      ", ", round(beta_s_summary$`0.975quant`, 4), "]"
+    ))
+  }
+  
+  # ---------------------------------------------------------------------------
+  # 13. Output
+  # ---------------------------------------------------------------------------
+  return(list(
+    # Prepared data
+    data = df,
+    
+    # Raw INLA output
+    inla = res_joint,
+    
+    # Predictions at observation locations (Process 2)
+    pred = df_pred,
+    
+    # Coupling coefficient β_s 
+    beta_s = beta_s_summary,
+    
+    # Mesh and dual mesh
+    mesh = mesh,
+    mesh_plot = mesh_plot,
+    voronoi_plot = voronoi_plot,
+    voronoi_areas = voronoi_areas,
+    
+    # Model comparison metrics
+    metrics = list(
+      DIC = res_joint$dic$dic,
+      WAIC = res_joint$waic$waic,
+      CPO = -mean(log(res_joint$cpo$cpo[idx_binom]), na.rm = TRUE)
+    )
+  ))
+}
+```
+
+### Results
+
+::: {style="text-align: justify"}
+The joint model converged across all four sites (n=2 129). Model fit was satisfactory, with a log-score CPO of 0.303 and an AUC of 0.856, indicating good discriminatory ability between colonised and uncolonised substrates. Predicted mean colonisation probabilities closely tracked observed rates at all sites, confirming adequate calibration at the site level.
+:::
+
+![](../02_Displays/Tables/pred_vs_observed_by_site.png){width="60%" fig-align="center"}
+
+::: {style="text-align: justify"}
+**Fixed effects - Process 2 :** Substrate saproxylation stage was the dominant driver of colonisation probability. Relative to stage 1 (reference), stages 4 and 5 showed large positive effects (β = 2.12 \[0.09, 4.14\] and β = 2.61 \[0.57, 4.65\] respectively), while stage 2 was indistinguishable from the reference (β ≈ 0, 95% CI spanning zero) and stage 3 showed an intermediate, marginally significant effect (β = 1.54 \[-0.50, 3.57\]). Conifer substrates were colonised significantly more often than deciduous ones (β = 0.95 \[0.33, 1.57\]), consistent with the known preference of *B. viridis* for softwood species. Substrate diameter had a modest but significant positive effect (β = 0.51 \[0.30, 0.71\]), indicating that larger logs are more likely to be colonised. Stumps were strongly disfavoured relative to logs (β = -2.37 \[-2.92, -1.82\]).
+:::
+
+![](../02_Displays/Figures/joint_INLA/fixed_effects_P2.png){fig-align="center"}
+
+![](../02_Displays/Tables/joint_INLA_fixed.png){fig-align="center" width="60%"}
+
+::: {style="text-align: justify"}
+**Spatial fields :** The CWD spatial field $w_1$ had an estimated range of 5.5 m \[0.5–27.4 m\], consistent with the metric-scale clustering identified by the PCF analysis and reflecting the localised nature of deadwood accumulation around individual dying trees. The residual *B. viridis* field $w_2$ operated at a much larger scale, with an estimated range of 82.9 m \[49.1–132.9 m\], suggesting broad-scale spatial autocorrelation in colonisation probability that is not explained by the measured substrate covariates. This residual structure likely reflects unmeasured environmental gradients, such as microclimatic variation in humidity, canopy closure or limitations in *B.viridis* dispersal range operating at the plot scale. The $w_2$ maps reveal spatially coherent zones of higher and lower colonisation probability within each site, which do not correspond to any single measured covariate, pointing to the existence of site-level heterogeneity beyond the substrate properties included in the model.
+:::
+
+![](../02_Displays/Tables/joint_INLA_hyper.png){fig-align="center" width="60%"}
+
+```{=html}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <img src="../02_Displays/Figures/joint_INLA/w1_M2.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w2_M2.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w1_M3.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w2_M3.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w1_M4.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w2_M4.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w1_M5.png" style="width:100%"/>
+  <img src="../02_Displays/Figures/joint_INLA/w2_M5.png" style="width:100%"/>
+</div>
+```
+
+![](../02_Displays/Figures/joint_INLA/pred_all_sites.png){fig-align="center"}
+
+::: {style="text-align: justify"}
+**Coupling coefficient β_s :** The posterior distribution of the coupling coefficient $β_s$ was centred near zero (mean = -0.007, 95% CI \[-0.827, 0.801\], P($β_s$ \> 0) = 0.495), providing no evidence that areas of high deadwood density exert any additional effect on colonisation probability beyond what is already captured by individual substrate covariates. This null result is ecologically informative : once substrate quality (saproxylation, diameter, species, type) is controlled for, the local spatial density of deadwood does not influence colonisation. This confirms that *B. viridis* responds to substrate-level properties rather than to neighbourhood deadwood abundance.
+:::
+
+![](../02_Displays/Figures/joint_INLA/beta_s_posterior.png){fig-align="center"}
+
+::: {style="text-align: justify"}
+**Model fit and calibration :** The ROC curve yielded an AUC of 0.856, indicating good overall discrimination. The PIT histogram, however, reveals a strong right-skewed distribution concentrated near 1, indicating that the model is overconfident for a large proportion of observations, systematically assigning low predicted probabilities to uncolonised substrates, which is formally correct but masks poor resolution for the positive class. This right-skewed pattern is however expected in the context of rare species distribution modelling : when presence events are scarce relative to absences, the model correctly assigns low predicted probabilities to the vast majority of observations, which mechanically concentrates PIT values near 1. This pattern therefore reflects the structural imbalance of the data rather than a genuine calibration failure, and should not be interpreted as a model deficiency (Jeliazkov *et al.* 2022). The distribution of predicted probabilities by site confirms this pattern : colonised and uncolonized substrates partially overlap in predicted probability space, particularly at sites with low colonisation rates (M2, M4, M5), where the model struggles to distinguish positive cases from the bulk of uncolonised substrates.
+:::
+
+![](../02_Displays/Figures/joint_INLA/predictions_distribution.png){fig-align="center"}
+
+![](../02_Displays/Figures/joint_INLA/ROC_curve.png){fig-align="center" width="70%"}
+
+![](../02_Displays/Figures/joint_INLA/PIT_calibration.png){fig-align="center" width="80%"}
+
+### Null Trend Verification
+
+::: {style="text-align: justify"}
+This result $β_s$ ≈ 0 may appear surprising, both because it contradicts the positive effect of local deadwood density observed in the PPM, and because it challenges the hypothesis, supported in the literature, that dense deadwood aggregations create favourable microclimatic conditions or facilitate short-distance spore dispersal. To verify that this result does not reflect a modelling artefact, such as over-absorption of the density signal by the residual field $w_2$ or prior sensitivity, we conducted an independent non-parametric verification. For each substrate, the local deadwood density was computed as the number of neighbouring substrates within a 10 m radius, excluding the focal point itself. The correlation between this neighbourhood density index and colonisation status (P_BUX) was then assessed using Spearman's rank correlation coefficient, both globally across all sites and independently within each site. This approach is entirely model-free and makes no assumption about spatial structure or covariate effects, providing a direct empirical test of whether substrates located in denser deadwood neighbourhoods are more frequently colonised than isolated ones.
+:::
+
+::: {style="text-align: justify"}
+**Results :** The Spearman correlation test confirmed the absence of any meaningful association between local deadwood density and colonisation status. At the global level, the correlation was negligible and non-significant ($ρ$ = -0.022, p = 0.310, n = 2129). Site-level results were equally uninformative : correlations ranged from $ρ$ = -0.029 (M4) to $ρ$ = 0.090 (M2), and were non-significant at three out of four sites. The only marginally significant result, observed at M2 ($ρ$ = 0.090, p = 0.044), was of negligible effect size and should be interpreted with caution given the large number of tied ranks inherent to a binary response variable, which prevented exact p-value computation. Taken together, these model-free results are fully consistent with the $β_s$ ≈ 0 estimate from the joint INLA model, and confirm that local deadwood density carries no detectable signal for B. viridis colonisation at the spatial scale investigated. The species appears to select substrates on the basis of their intrinsic properties rather than their spatial context within the deadwood network.
+:::
+
+![](../02_Displays/Tables/spearman_coupling.png){fig-align="center" width="75%"}
+
+
+### Spatial block cross-validation
+
+::: {style="text-align: justify"}
+The predictive performance of the joint INLA model was assessed using a repeated spatial block holdout procedure, designed to account for the spatial autocorrelation structure of the data. Standard random cross-validation is inappropriate in spatially structured datasets because training and test observations drawn from nearby locations share autocorrelated residuals, leading to optimistic performance estimates that do not reflect genuine predictive ability at unobserved locations (Roberts *et al.*, 2017).
+
+The spatial block cross-validation procedure follows the methodology described in J.Papaïx, J-Y.Barnagaud *et al.* (unpublished) : Spatial analysis of the wildlife roadkill risk at a regional scale.At each of the 100 replicates, one random point was drawn per site, and all substrates located within a 40 m radius of that point were assigned to the test set. This exclusion radius was chosen to exceed the estimated range of the residual *B. viridis* spatial field $w_2$ (~82 m posterior mean), ensuring that test observations are spatially decoupled from the training set and that the model cannot exploit local autocorrelation to inflate predictive scores. The model was then re-estimated from scratch on the remaining training data using the same joint INLA specification (LGCP + Binomial, shared field $w_1$, residual field $w_2$), with the *ccd* integration strategy for full accuracy. Predictions on the test set were computed from fixed effects only, without extrapolating the spatial random fields to held-out locations, which would artificially borrow strength from the training spatial structure.
+
+Predictive discrimination was quantified using the Area Under the ROC Curve (AUC), computed both globally across all sites and independently within each site. Replicates yielding fewer than five test observations or a degenerate response (all absences or all presences in the test set) were discarded.
+:::
+
+::: {style="text-align: justify"}
+**INLA joint model validation function code**
+:::
+
+```{r}
+#| code-fold: true
+#| eval: false
+# -----------------------------------------------------------------------------
+# run_parallel_cv : Parallelised spatial block cross-validation
+# 
+# Evaluates the predictive performance of the joint INLA model using repeated
+# spatial block holdout. At each replicate, one random point per site is drawn
+# and all substrates within a given radius are excluded from training (test set).
+# The model is re-fitted on the remaining data and predictions are made on the
+# test set using fixed effects only (no spatial field extrapolation).
+#
+# Arguments:
+#   res : output object from fun_joint_inla()
+#   n_rep : number of cross-validation replicates
+#   radius : exclusion radius in metres around the holdout point
+#   n_cores : number of parallel cores 
+#   error_handling : foreach error handling -> "remove" (skip) or "pass" (return error)
+#
+# Returns a data frame with one row per valid replicate :
+#   $rep : replicate index
+#   $n_test : number of test observations
+#   $n_train : number of training observations
+#   $auc : global AUC
+#   $auc_M2 ... $auc_M5 : per-site AUC
+# -----------------------------------------------------------------------------
+run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
+                            error_handling = "remove") {
+  
+  df_full <- res$data
+  df_full$Site <- factor(df_full$Site)
+  sites <- levels(df_full$Site)
+  
+  message(paste0("Launching CV : ", n_rep, " replicates | ",
+                 n_cores, " cores | radius = ", radius, " m"))
+  
+  # ---------------------------------------------------------------------------
+  # 1. Cluster initialisation
+  # ---------------------------------------------------------------------------
+  cl <- makeCluster(n_cores)
+  registerDoParallel(cl)
+  
+  # Explicit library loading on each worker
+  # (INLA sometimes has namespace issues in parallel environments)
+  clusterEvalQ(cl, {
+    library(INLA)
+    library(dplyr)
+    library(tidyr)
+    library(sf)
+    library(fmesher)
+    library(Matrix)
+    library(pROC)
+  })
+  
+  clusterExport(cl,
+                varlist = c("fun_joint_inla", "df_full", "sites", "radius"),
+                envir = environment())
+  
+  # ---------------------------------------------------------------------------
+  # 2. Parallel loop
+  # ---------------------------------------------------------------------------
+  results <- foreach(
+    i = 1:n_rep,
+    .packages = c("INLA", "dplyr", "tidyr", "pROC", "sf",
+                       "fmesher", "Matrix", "ggplot2"),
+    .combine = rbind,
+    .errorhandling = error_handling
+  ) %dopar% {
+    
+    set.seed(i)
+    
+    # --- A. Random point per site + circular exclusion ----------------------
+    # One random centre is drawn per site; all points within the radius
+    # are assigned to the test set
+    idx_test_all <- c()
+    
+    for (s in sites) {
+      idx_site <- which(df_full$Site == s)
+      coords_s <- as.matrix(df_full[idx_site, c("X", "Y")])
+      idx_centre <- sample(nrow(coords_s), 1)
+      x_rand <- coords_s[idx_centre, 1]
+      y_rand <- coords_s[idx_centre, 2]
+      dists <- sqrt((coords_s[, 1] - x_rand)^2 + (coords_s[, 2] - y_rand)^2)
+      idx_test_all <- c(idx_test_all, idx_site[which(dists <= radius)])
+    }
+    
+    idx_train_all <- setdiff(seq_len(nrow(df_full)), idx_test_all)
+    df_train <- df_full[idx_train_all, ]
+    df_test <- df_full[idx_test_all, ]
+    
+    # Minimum size checks
+    if (nrow(df_test) < 5)   return(NULL)
+    if (nrow(df_train) < 100) return(NULL)
+    if (length(unique(df_test$P_Bux)) < 2) return(NULL)
+    
+    # --- B. Model re-estimation on training data ----------------------------
+    res_cv <- tryCatch(
+      fun_joint_inla(
+        data = df_train,
+        max.edge = c(5, 20), cutoff = 1, offset = c(10, 30),
+        prior.range1 = c(20, 0.9), prior.sigma1 = c(1, 0.5),
+        prior.range2 = c(50, 0.5), prior.sigma2 = c(1, 0.01)
+      ),
+      error = function(e) NULL
+    )
+    
+    if (is.null(res_cv)) return(NULL)
+    
+    # --- C. Prediction on test set — fixed effects only ---------------------
+    # Spatial field is not extrapolated to test locations;
+    # only the fixed effect linear predictor is used
+    fe <- res_cv$inla$summary.fixed
+    
+    diam_mean <- mean(df_train$Diameter, na.rm = TRUE)
+    diam_sd <- sd(df_train$Diameter,   na.rm = TRUE)
+    diam_test_sc <- (df_test$Diameter - diam_mean) / diam_sd
+    
+    lp_test <- fe["intercept_p2", "mean"] +
+      fe["Diam_sc", "mean"] * diam_test_sc +
+      fe["Sap_max2", "mean"] * as.integer(df_test$Sap_max == "2") +
+      fe["Sap_max3", "mean"] * as.integer(df_test$Sap_max == "3") +
+      fe["Sap_max4", "mean"] * as.integer(df_test$Sap_max == "4") +
+      fe["Sap_max5", "mean"] * as.integer(df_test$Sap_max == "5") +
+      fe["Essence_Conifer", "mean"] * as.integer(df_test$Essence == "Résineux") +
+      fe["Type_Stump", "mean"] * as.integer(df_test$Type == "Souche")
+    
+    p_pred <- plogis(lp_test)
+    
+    # --- D. Global AUC ------------------------------------------------------
+    auc_global <- tryCatch(
+      as.numeric(auc(roc(df_test$P_Bux, p_pred, quiet = TRUE))),
+      error = function(e) NA_real_
+    )
+    
+    # --- E. Per-site AUC ----------------------------------------------------
+    auc_by_site <- sapply(sites, function(s) {
+      idx_s <- which(df_test$Site == s)
+      if (length(idx_s) < 5) return(NA_real_)
+      if (length(unique(df_test$P_Bux[idx_s])) < 2) return(NA_real_)
+      tryCatch(
+        as.numeric(auc(roc(df_test$P_Bux[idx_s], p_pred[idx_s], quiet = TRUE))),
+        error = function(e) NA_real_
+      )
+    })
+    
+    # --- F. Output ----------------------------------------------------------
+    data.frame(
+      rep = i,
+      n_test = nrow(df_test),
+      n_train = nrow(df_train),
+      auc = auc_global,
+      auc_M2 = auc_by_site["M2"],
+      auc_M3 = auc_by_site["M3"],
+      auc_M4 = auc_by_site["M4"],
+      auc_M5 = auc_by_site["M5"]
+    )
+  }
+  
+  stopCluster(cl)
+  
+  # ---------------------------------------------------------------------------
+  # 3. Summary
+  # ---------------------------------------------------------------------------
+  if (is.null(results) || nrow(results) == 0) {
+    message("WARNING : no valid replicates — check errors with error_handling = 'pass'")
+    return(NULL)
+  }
+  
+  message("\n=== Spatial cross-validation summary ===")
+  message(paste0("Valid replicates : ", nrow(results), " / ", n_rep))
+  
+  cat(paste0(
+    "\nGlobal AUC\n",
+    "  Median : ", round(median(results$auc, na.rm = TRUE), 3), "\n",
+    "  95% CI : [",
+    round(quantile(results$auc, 0.025, na.rm = TRUE), 3), " — ",
+    round(quantile(results$auc, 0.975, na.rm = TRUE), 3), "]\n",
+    "\nPer-site AUC (median)\n",
+    "  M2 : ", round(median(results$auc_M2, na.rm = TRUE), 3), "\n",
+    "  M3 : ", round(median(results$auc_M3, na.rm = TRUE), 3), "\n",
+    "  M4 : ", round(median(results$auc_M4, na.rm = TRUE), 3), "\n",
+    "  M5 : ", round(median(results$auc_M5, na.rm = TRUE), 3), "\n"
+  ))
+  
+  return(results)
+}
+```
