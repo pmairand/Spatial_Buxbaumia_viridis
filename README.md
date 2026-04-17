@@ -2,28 +2,24 @@
  
 **Master Thesis — Paul Mairand**  
 Office National des Forêts (ONF) — 2025
- 
----
+
  
 ## Study species
  
-*Buxbaumia viridis* (green shield-moss) is one of the few bryophytes protected in France and Europe (Habitats Directive, Annex II 92/43/EEC ; Bern Convention, Annex I ; ECCB 1995 — VU). It is a saprolignicolous moss that colonizes coarse woody debris (CWD) in coniferous montane forests, requiring advanced stages of wood decomposition and dense canopy cover.
- 
----
+*Buxbaumia viridis* (green shield-moss) is one of the few bryophytes protected in France and Europe (Habitats Directive, Annex II 92/43/EEC ; Bern Convention, Annex I ; ECCB 1995 - VU). It is a saprolignicolous moss that colonizes coarse woody debris (CWD) in coniferous montane forests, requiring advanced stages of wood decomposition and dense canopy cover.
+
  
 ## Objectives
  
 Most existing studies on *B. viridis* have focused on chorological distribution or habitat niche modelling at broad spatial scales. This study addresses a gap in the literature by investigating the **fine-scale spatial structure** of the species within individual forest plots in the Massif Central (France).
  
 The core question is: **does *B. viridis* simply follow the deadwood resource, or does it exhibit independent spatial processes** (dispersal limitation, conspecific facilitation) that shape its colonisation pattern beyond what microhabitat quality alone can predict?
- 
----
+
  
 ## Study area
  
 Four forest plots in the **Massif Central, France** (sites M2, M3, M4, M5), covering montane coniferous forests with varying colonisation rates (6–22%).
- 
----
+
  
 ## Methods
  
@@ -56,8 +52,7 @@ $$\log \lambda_1(s) = \mu_1 + w_1(s)$$
 $$\text{logit}(p_i) = \alpha + \beta_{\text{diam}} \cdot \text{diam}_i + \beta_{\text{sapmax}} \cdot SapMAX_i + \beta_{\text{ess}} \cdot [\text{conifer}] + \beta_{\text{sup}} \cdot [\text{stump}] + \beta_s \cdot w_1(s_i) + w_2(s_i)$$
 
 The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood density independently favour colonisation once individual substrate covariates are accounted for. Penalized Complexity (PC) priors were placed on spatial field hyperparameters to ensure model identifiability.
- 
----
+
  
 ## Main results
  
@@ -66,7 +61,7 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
 - **Saproxylation stage** is the dominant driver of colonisation intensity across all sites (β = 1.60–2.67, p < 0.001).
 - **KPPM** found no residual clustering after environmental filtering : the spatial pattern of *B. viridis* is fully explained by environmental covariates, with no detectable dispersal-driven contagion.
 - **Joint INLA** confirms that local deadwood density has no independent effect on colonisation probability (β_s ≈ 0) once substrate-level covariates are controlled.
----
+
  
 ## Repository structure
  
@@ -89,21 +84,21 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
     └── Buxbaumia_viridis-Stage_P_Mairand.qmd   # Full analysis report
 ```
  
->️ Raw data are not included in this repository (650 MB).
- 
----
+>️ Raw data are not included in this repository.
+
  
 ## Main R packages
  
 - [`spatstat`](https://spatstat.org/) — point pattern analysis (PCF, MCF, PPM, KPPM)
 - [`R-INLA`](https://www.r-inla.org/) — Bayesian spatial modelling
----
+
  
 ## Key references
  
-- Rue, Martino & Chopin (2009) — INLA
-- Lindgren, Rue & Lindström (2011) — SPDE approach
-- Krainski et al. (2018) — *Advanced Spatial Modeling with SPDE*
-- Simpson et al. (2016) — PC priors
-- Kropik et al. (2020) — *B. viridis* ecology and dispersal
-- Offerhaus et al. (2019) — *B. viridis* distribution in Europe
+- Rue, Martino & Chopin (2009) - INLA
+- Lindgren, Rue & Lindström (2011) - SPDE approach
+- Krainski et al. (2018) - *Advanced Spatial Modeling with SPDE*
+- Simpson et al. (2016) - PC priors
+- Kropik et al. (2020) - *B. viridis* ecology and dispersal
+- Offerhaus et al. (2019) - *B. viridis* distribution in Europe
+
