@@ -98,3 +98,7 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
 - Kropik et al. (2020) - *B. viridis* ecology and dispersal
 - Offerhaus et al. (2019) - *B. viridis* distribution in Europe
 
+## Data availability
+
+The data will be made available on Zenodo as soon as this study is published.
+
