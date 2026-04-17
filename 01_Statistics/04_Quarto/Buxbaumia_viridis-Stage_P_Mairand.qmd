@@ -150,6 +150,7 @@ significant (p < 0.001), confirming that *B. viridis* colonisation is strongly c
 ```
 
 ::: {style="text-align: justify"}
+
 **Limits :** One important limitation concerns the inclusion of local deadwood density (dens10) as a covariate. Because colonised substrates are themselves deadwood, a positive effect of dens10 on colonisation intensity is to some extent tautological : areas with more deadwood will mechanically contain more colonised deadwood, regardless of any biological preference. The dens10 effect should therefore be interpreted with caution, as a descriptor of spatial co-occurrence rather than evidence of a causal effect of substrate density on colonisation probability.
 
 Furthermore, PPMs are restricted to spatially continuous covariates. Categorical substrate variables (tree species, substrate type) could not be included directly and required spatial interpolation of inherently discrete values, a method widely criticised for its imprecision.
@@ -166,7 +167,7 @@ This formulation conditions on substrate availability by design. Furthermore, th
 :::
 
 ::: {style="text-align: justify"}
-To jointly model the spatial distribution of CWD and the colonisation probability of *Buxbaumia viridis*, we implemented a joint latent Gaussian model fitted using INLA (Integrated Nested Laplace Approximation ; Rue et al., 2009) combined with the SPDE approach (Lindgren et al., 2011). The model couples two processes through a shared spatial random field, allowing uncertainty from the first process to propagate into the second without double-fitting.
+A preliminary simple INLA model was fitted at the individual substrate level, confirming the importance of saproxylation stage and diameter as drivers of colonisation. The joint model was then developed to additionally account for the spatial structure of deadwood distribution. To jointly model the spatial distribution of CWD and the colonisation probability of *Buxbaumia viridis*, we implemented a joint latent Gaussian model fitted using INLA (Integrated Nested Laplace Approximation ; Rue et al., 2009) combined with the SPDE approach (Lindgren et al., 2011). The model couples two processes through a shared spatial random field, allowing uncertainty from the first process to propagate into the second without double-fitting.
 :::
 
 ::: {style="text-align: justify"}
@@ -792,7 +793,7 @@ Predictive discrimination was quantified using the Area Under the ROC Curve (AUC
 #
 # Evaluates the predictive performance of the joint INLA model using repeated
 # spatial block holdout. At each replicate, one random point per site is drawn
-# and all substrates within a given radius are excluded from training (test set).
+# and all substrates within a given radius are excluded from training.
 # The model is re-fitted on the remaining data and predictions are made on the
 # test set using fixed effects only (no spatial field extrapolation).
 #
@@ -801,7 +802,8 @@ Predictive discrimination was quantified using the Area Under the ROC Curve (AUC
 #   n_rep : number of cross-validation replicates
 #   radius : exclusion radius in metres around the holdout point
 #   n_cores : number of parallel cores
-#   error_handling : foreach error handling -> "remove" (skip) or "pass" (return error)
+#   error_handling : foreach error handling 
+#                    -> "remove" (skip) or "pass" (return error)
 #
 # Returns a data frame with one row per valid replicate :
 #   $rep : replicate index
