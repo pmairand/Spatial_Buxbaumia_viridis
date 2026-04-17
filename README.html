@@ -355,25 +355,162 @@ display: none;
 <div id="role-of-dispersal-and-microhabitat-on-the-spatial-distribution-of-a-coarse-wood-associated-moss-at-the-local-scale" class="section level1">
 <h1>Role of dispersal and microhabitat on the spatial distribution of a
 coarse wood-associated moss at the local scale</h1>
-<p>Master Thesis - Paul Mairand</p>
-<div id="description" class="section level2">
-<h2>Description</h2>
-<p>Spatial point pattern analysis of <em>Buxbaumia viridis</em>
-colonisation on deadwood substrates in the Massif Central, France.</p>
+<p><strong>Master Thesis — Paul Mairand</strong><br />
+Office National des Forêts (ONF) — 2025</p>
+<hr />
+<div id="study-species" class="section level2">
+<h2>Study species</h2>
+<p><em>Buxbaumia viridis</em> (green shield-moss) is one of the few
+bryophytes protected in France and Europe (Habitats Directive, Annex II
+92/43/EEC ; Bern Convention, Annex I ; ECCB 1995 — VU). It is a
+saprolignicolous moss that colonizes coarse woody debris (CWD) in
+coniferous montane forests, requiring advanced stages of wood
+decomposition and dense canopy cover.</p>
+<hr />
 </div>
-<div id="scripts" class="section level2">
-<h2>Scripts</h2>
-<ul>
-<li><code>00_Bux_Articles_plot.R</code></li>
-<li><code>01_Data_management.R</code></li>
-<li><code>02_PCF_MCF_PPM.R</code> — point pattern analysis</li>
-<li><code>03_INLA.R</code> - simple INLA model</li>
-<li><code>04_joint_INLA.R</code> — joint INLA model</li>
-</ul>
+<div id="objectives" class="section level2">
+<h2>Objectives</h2>
+<p>Most existing studies on <em>B. viridis</em> have focused on
+chorological distribution or habitat niche modelling at broad spatial
+scales. This study addresses a gap in the literature by investigating
+the <strong>fine-scale spatial structure</strong> of the species within
+individual forest plots in the Massif Central (France).</p>
+<p>The core question is: <strong>does <em>B. viridis</em> simply follow
+the deadwood resource, or does it exhibit independent spatial
+processes</strong> (dispersal limitation, conspecific facilitation) that
+shape its colonisation pattern beyond what microhabitat quality alone
+can predict?</p>
+<hr />
+</div>
+<div id="study-area" class="section level2">
+<h2>Study area</h2>
+<p>Four forest plots in the <strong>Massif Central, France</strong>
+(sites M2, M3, M4, M5), covering montane coniferous forests with varying
+colonisation rates (6–22%).</p>
+<hr />
 </div>
 <div id="methods" class="section level2">
 <h2>Methods</h2>
-<p>PPM, KPPM, Joint INLA model (SPDE approach)</p>
+<div id="exploratory-analysis-second-order-statistics" class="section level3">
+<h3>Exploratory analysis — Second-order statistics</h3>
+<ul>
+<li><strong>Pair Correlation Function (PCF)</strong> : quantifies
+spatial aggregation of deadwood substrates relative to complete spatial
+randomness (CSR). Values g(r) &gt; 1 indicate aggregation at scale
+r.</li>
+<li><strong>Mark Connection Function (MCF)</strong> : estimates the
+probability that two substrates at distance r are both colonised by
+<em>B. viridis</em>, under a random labelling null hypothesis.
+Departures above the simulation envelope indicate clustering of
+colonised substrates independent of the underlying CWD distribution. ###
+Point Process Models — PPM / KPPM</li>
+</ul>
+<p>Inhomogeneous Poisson Point Process Models (PPM) fitted by maximum
+likelihood with three spatially continuous covariates:</p>
+<p><span class="math display">\[\log \lambda(u) = \beta_0 + \beta_1
+\cdot \text{dens10}(u) + \beta_2 \cdot \text{alt}(u) + \beta_3 \cdot
+\text{sap}(u)\]</span></p>
+<ul>
+<li><code>dens10</code> : local deadwood density weighted by diameter
+(10 m bandwidth)</li>
+<li><code>alt</code> : smoothed local altitude</li>
+<li><code>sap</code> : substrate saproxylation stage An inhomogeneous
+<strong>Matérn cluster process (KPPM)</strong> was additionally fitted
+to test for residual spatial clustering after environmental
+filtering.</li>
+</ul>
+</div>
+<div id="joint-inla-model-bayesian-spatial-modelling" class="section level3">
+<h3>Joint INLA model — Bayesian spatial modelling</h3>
+<p>A joint latent Gaussian model fitted via <strong>INLA</strong>
+(Integrated Nested Laplace Approximation) combined with the <strong>SPDE
+approach</strong>, coupling two processes through a shared spatial
+random field:</p>
+<p><strong>Process 1 — Log-Gaussian Cox Process (LGCP)</strong> for
+deadwood distribution:</p>
+<p><span class="math display">\[\log \lambda_1(s) = \mu_1 +
+w_1(s)\]</span></p>
+<p><strong>Process 2 — Binomial model</strong> for <em>B. viridis</em>
+colonisation probability:</p>
+<p><span class="math display">\[\logit(pᵢ) = α + β_diam·diamᵢ +
+β_smax·S_MAXᵢ + β_ess·[conifer] + β_sup·[stump] + βs·w₁(sᵢ) +
+w₂(sᵢ)\]</span></p>
+<p>The coupling term <span class="math inline">\(\beta_s \cdot
+w_1(s_i)\)</span> tests whether areas of high deadwood density
+independently favour colonisation once individual substrate covariates
+are accounted for. Penalized Complexity (PC) priors were placed on
+spatial field hyperparameters to ensure model identifiability.</p>
+<hr />
+</div>
+</div>
+<div id="main-results" class="section level2">
+<h2>Main results</h2>
+<ul>
+<li><strong>Deadwood</strong> is strongly aggregated at the metric scale
+(r &lt; 2–3 m) at all four sites, driven by localised tree fall
+events.</li>
+<li><strong>MCF</strong> reveals independent spatial clustering of
+colonised substrates only at the most heavily colonised site (M3, 22%),
+consistent with short-distance spore dispersal or local source
+effects.</li>
+<li><strong>Saproxylation stage</strong> is the dominant driver of
+colonisation intensity across all sites (β = 1.60–2.67, p &lt;
+0.001).</li>
+<li><strong>KPPM</strong> found no residual clustering after
+environmental filtering : the spatial pattern of <em>B. viridis</em> is
+fully explained by environmental covariates, with no detectable
+dispersal-driven contagion.</li>
+<li><h2 id="joint-inla-confirms-that-local-deadwood-density-has-no-independent-effect-on-colonisation-probability-β_s-0-once-substrate-level-covariates-are-controlled."><strong>Joint
+INLA</strong> confirms that local deadwood density has no independent
+effect on colonisation probability (β_s ≈ 0) once substrate-level
+covariates are controlled.</h2></li>
+</ul>
+</div>
+<div id="repository-structure" class="section level2">
+<h2>Repository structure</h2>
+<pre><code>01_Statistics/
+├── 01_R_Scripts/
+│   ├── 00_Bux_Articles_plot.R       # Bibliographic data visualisation
+│   ├── 01_Data_management.R         # Data cleaning and preparation
+│   ├── 02_PCF_MCF_PPM.R             # Exploratory point pattern analysis
+│   ├── 03_INLA.R                    # Simple INLA model
+│   ├── 04_joint_INLA.R              # Joint INLA model (LGCP + Binomial)
+│   ├── 05_joint_INLA_validation.R   # Model validation
+│   └── Functions/                   # Custom R functions
+│       ├── 01_PCF_fun.R
+│       ├── 02_MCF_fun.R
+│       ├── 03_INLA_fun.R
+│       ├── 04_joint_INLA_fun.R
+│       └── 05_joint_INLA_valid_fun.R
+└── 04_Quarto/
+    └── Buxbaumia_viridis-Stage_P_Mairand.qmd   # Full analysis report</code></pre>
+<blockquote>
+<p>️ Raw data are not included in this repository (650 MB).</p>
+</blockquote>
+<hr />
+</div>
+<div id="main-r-packages" class="section level2">
+<h2>Main R packages</h2>
+<ul>
+<li><a href="https://spatstat.org/"><code>spatstat</code></a> — point
+pattern analysis (PCF, MCF, PPM, KPPM)</li>
+<li><h2 id="r-inla-bayesian-spatial-modelling"><a href="https://www.r-inla.org/"><code>R-INLA</code></a> — Bayesian
+spatial modelling</h2></li>
+</ul>
+</div>
+<div id="key-references" class="section level2">
+<h2>Key references</h2>
+<ul>
+<li>Rue, Martino &amp; Chopin (2009) — INLA</li>
+<li>Lindgren, Rue &amp; Lindström (2011) — SPDE approach</li>
+<li>Krainski et al. (2018) — <em>Advanced Spatial Modeling with
+SPDE</em></li>
+<li>Simpson et al. (2016) — PC priors</li>
+<li>Kropik et al. (2020) — <em>B. viridis</em> ecology and
+dispersal</li>
+<li>Offerhaus et al. (2019) — <em>B. viridis</em> distribution in
+Europe</li>
+</ul>
 </div>
 </div>
 
