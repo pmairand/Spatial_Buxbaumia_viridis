@@ -1,0 +1,43 @@
+﻿Variable;Type;Signification;Modalités
+MASSIF;Qualitatif;Massif échantilloné;Alpes / Massif central / Pyrenees / Vosges
+SITE;Qualitatif;Site d'échantillonage;AN2 / AN3 / AN4 / M2 / M3 / M4 / M5 / P1 / P2 / P3 / P4 / V1 / V2 / V3 / V4
+PLACETTE;Qualitatif;Placette d'échantillonage;*SITE*_1 à *SITE*_9
+DATE;Qualitatif;Date;aa/mm/jj
+X;Geo;Longitude de la placette (DD WGS84);-
+Y;Geo;Latitude de la placette (DD WGS84);-
+ALTI;Quantitatif;Altitude de l'échantillonage;-
+EXPO;Qualitatif;Exposition du versant;N / O /  S / E
+NORD;Quantitatif;Nordité de la placette = cos(degré*(pi/180));Varie entre -1(sud) et 1(nord)
+ORIEN_g;Quantitatif;Orientation de la placette (gradient);-
+ORIEN_dg;Quantitatif;Orientation de la placette (degré);-
+PENTE;Quantitatif;Pente (en %);-
+PH;Qualitatif;pH;Acidophile / Neutrophile / Calcicole
+MILIEU;Qualitatif;Milieu d'échantillonage;Forêt / Trouée / Lisière
+SYNTAXON;Qualitatif;Alliance phytosociologique de la placette;Luzulo-Fagion sylvaticae / Tilio platyphylli-Acerion pseudoplatani / Cephalanthero damasonii-Fagion sylvaticae / Fagion sylvaticae / Carici macrostyli-Nardion strictae / Calluno vulgaris-Arctostaphylion uvae-ursi / Luzulo luzuloides - Piceion abietis
+ESS1;Qualitatif;Essence principale;Abies alba /Pinus sylvestris / Fagus sylvatica / Picea abies / Larix decidua / Autre
+ESS2;Qualitatif;Essence secondaire;Picea abies / Fagus sylvatica / Abies alba / Pinus sylvestris / Autre 
+SYLVIGEN;Qualitatif;Stades de sylvigenèse;Optimal / Régénération / Initial / Terminale / Déclin
+STRUCT_V;Qualitatif;Structure de la stratification verticale et dominance (DOMINANTE = Strate arborescente haute / DOMINEE = Strate arborescente basse);Association de : Bryoherb / Arbu haut / Arbu bas / Dominée / Dominante
+NB_STR;Semi-quantitatif;Nombre de srates du milieu;1 / 2 / 3 / 4 / 5
+NB_STRH;Semi-quantitatif;Nombre de srates hautes du milieu;0 / 1 / 2 / 3
+BRYOH;0/1;Strate Bryo/Herbacées;0 / 1
+ARBBAS;0/1;Strate arbustive basse;0 / 1
+ARBHT;0/1;Strate arbustive haute;0 / 1
+ARBOBA;0/1;Strate arborescente basse;0 / 1
+ARBOHT;0/1;Strate arborescente haute;0 / 1
+G_PB;Quantitatif;Surface terrière des petits bois;-
+G_BM;Quantitatif;Surface terrière des bois moyens;-
+G_GB;Quantitatif;Surface terrière des gros bois;-
+G_TOT;Quantitatif;Surface terrière totale (PB+BM+GB);-
+G_BMS;Quantitatif;Surface terrière des bois morts au sol;-
+TGB;0/1;Présence de très gros bois (D>67.5cm);0 / 1
+TTGB;0/1;Présence de très très gros bois (D>90cm);0 / 1
+P_TGB;0/1;Presence/Absence de TGB ou TTGB;0 / 1
+METHODE;Qualitatif;Plan d'échantillonage Longue/Courte distance;PLD / PCD
+OPERA1;Booléen;TRUE si l'opérateur 1 a observé Buxbaumia dans la placette;TRUE / FALSE
+OPERA2;Booléen;TRUE si l'opérateur 2 a observé Buxbaumia dans la placette;TRUE / FALSE
+P_BUX;0/1;Presence/Absence de Buxbaumia;0 / 1
+PROP_BUX;%;Supports portant Buxbaumia/Supports total;-
+THERMOHY;Code;N° de série du thermohygromètre;-
+S_LUMI;Code;N° de série du luxmètre;-
+D10;Quantitatif;Distance du 10eme support au centre de la placette;-

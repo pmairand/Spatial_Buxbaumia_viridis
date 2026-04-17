@@ -1,0 +1,26 @@
+﻿Variable;Type;Echelle;Modalités
+Position du site / de la placette / du support;Qualitatif;Site / Placette / Support;-
+Date d'échantillonage;Qualitatif;Support;-
+Altitude d'échantillonage;Quantitatif;Support;-
+Operateur;Qualitatif;Placette;-
+Orientation (dg);Quantitatif;Placette;-
+Pente (%);Quantitatif;Placette;-
+pH;Quantitatif;Placette;-
+Type de milieu;Qualitatif;Placette;Foret (78) / Lisière (8) / Trouée (17)
+Syntaxon;Qualitatif;Placette;Cv-Au (1) / Cm-Ns (1) / Cd-Fs (11) / Fs (40) / L-Fs (36) / Ll-Pa (12) / Tp-Ap (2)
+Essences dominantes I et II;Qualitatif;Placette;A.alba (69-24) / F.sylv (24-40) / P.abies (1-27) / P.sylv (5-4) / L.deci (0-1) / NA (3-8)
+Stade de sylvigenèse;Qualitatif;Placette;Régénération (3) / Initial (27) / Optimal (60) / Terminale (7) / Déclin (4) / NA (2)
+Strates absentes /présentes;Semi-quantitatif;Placette;-
+Distance du 10e support;Quantitatif;Placette;-
+G des PB/BM/GB;Quantitatif;Placette;-
+G des BMS;Quantitatif;Placette;-
+Présence de TGB / TTGB;Qualitatif;Placette;-
+Données de thermohygromètre / luxmètre;Quantitatif;Placette;-
+Type de support;Qualitatif;Support;Bois mort au sol (2253) / Souche (952)
+Essence du support;Qualitatif;Support;Feuillus (443) / Indéterminé (142) / Résineux (2620)
+Diamètre du support;Quantitatif;Support;-
+Position du support;Qualitatif;Support; Axe de pente (897) / Perpandiculaire (590) / Autre (762) / NA (956)
+Contact au sol du support;Qualitatif;Support;Partiel (584) / Total (1505) / Absent (146) / NA (970)
+Stades de saproxylation;Semi-quantitatif;Support;-
+Présence de Buxbaumia viridis;Qualitatif;Support;-
+Position de Bux.vir. sur le support;Semi-quantitatif;Support;-

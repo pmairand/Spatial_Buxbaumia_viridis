@@ -75,10 +75,10 @@ Most studies have focused on chorology or niche models. This literature suggests
 ## Concept map
 
 ::: {.callout-note title="NB"}
-*To be updated, in English*
+*To be updated*
 :::
 
-![](images/clipboard-3446924970.png){fig-align="center"}
+![](../02_Displays/Figures/concept_map.png){fig-align="center"}
 
 # Data collection
 

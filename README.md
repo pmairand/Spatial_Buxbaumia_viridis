@@ -67,7 +67,7 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
  
 ```
 01_Statistics/
-├── 01_R_Scripts/
+├── 01_Statistics/01_R_Scripts/
 │   ├── 00_Bux_Articles_plot.R       # Bibliographic data visualisation
 │   ├── 01_Data_management.R         # Data cleaning and preparation
 │   ├── 02_PCF_MCF_PPM.R             # Exploratory point pattern analysis

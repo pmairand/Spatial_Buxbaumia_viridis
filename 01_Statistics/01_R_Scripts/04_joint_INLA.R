@@ -23,18 +23,18 @@ library(pROC)
 library(patchwork)
 library(gtsummary)
 library(gt)
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
+
 
 # -----------------------------------------------------------------------------
 # 1. Importing data
 # -----------------------------------------------------------------------------
-substrate_df <- read.csv("00_Data/02_Processed/CSV/substrate.csv") %>%
+substrate_df <- read.csv("01_Statistics/00_Data/02_Processed/CSV/substrate.csv") %>%
   select(Site, X, Y, Type, Essence, Diameter, Sap_max, P_Bux)
 
 # -----------------------------------------------------------------------------
 # 2. Run joint INLA model
 # -----------------------------------------------------------------------------
-source("01_R_Scripts/Functions/04_joint_INLA_fun.R")
+source("01_Statistics/01_R_Scripts/Functions/04_joint_INLA_fun.R")
 
 # For the final run, replace eb with ccd
 res <- fun_joint_inla(
@@ -84,7 +84,7 @@ res <- fun_joint_inla(
 # -----------------------------------------------------------------------------
 # 3. Export / Import
 # -----------------------------------------------------------------------------
-out_inla <- "00_Data/03_Results/05_joint_INLA"
+out_inla <- "01_Statistics/00_Data/03_Results/05_joint_INLA"
 
 saveRDS(res, file.path(out_inla, "res_joint_inla.rds"))
 
@@ -137,7 +137,7 @@ tbl_pred_summary
 
 # Save
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_pred_summary, "pred_vs_observed_by_site.png", path = "02_Displays/Tables")
+# gtsave(tbl_pred_summary, "pred_vs_observed_by_site.png", path = "01_Statistics/02_Displays/Tables")
 
 
 # --- Tables ---
@@ -210,13 +210,13 @@ tbl_joint_hyper
 
 # Save tables
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_joint_fixed, "joint_INLA_fixed.png",  path = "02_Displays/Tables")
-# gtsave(tbl_joint_hyper, "joint_INLA_hyper.png",  path = "02_Displays/Tables")
+# gtsave(tbl_joint_fixed, "joint_INLA_fixed.png",  path = "01_Statistics/02_Displays/Tables")
+# gtsave(tbl_joint_hyper, "joint_INLA_hyper.png",  path = "01_Statistics/02_Displays/Tables")
 
 # -----------------------------------------------------------------------------
 # 5. Fixed effects - Process 2
 # -----------------------------------------------------------------------------
-fig_dir_joint <- "02_Displays/Figures/Joint_INLA"
+fig_dir_joint <- "01_Statistics/02_Displays/Figures/Joint_INLA"
 save_fig <- FALSE # save figures in folder
 
 fixed <- r$summary.fixed %>%
@@ -635,4 +635,4 @@ tbl_spearman
 
 # Save table
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_spearman, "spearman_coupling.png", path = "02_Displays/Tables")
+# gtsave(tbl_spearman, "spearman_coupling.png", path = "01_Statistics/02_Displays/Tables")

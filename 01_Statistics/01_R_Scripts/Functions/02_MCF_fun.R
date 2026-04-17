@@ -36,7 +36,7 @@ MCF_function <- function(s,
   X <- get(ppp_name, envir = .GlobalEnv)
 
   # File path
-  fp_MCF <- file.path(paste0("00_Data/03_Results/02_MCF_CSR/", ppp_name, ".rds"))
+  fp_MCF <- file.path(paste0("01_Statistics/00_Data/03_Results/02_MCF_CSR/", ppp_name, ".rds"))
 
   # Recalculate or import
   if (recalculate) {
@@ -79,7 +79,7 @@ MCF_function <- function(s,
 
   # Save plot
   if (save_plot) {
-    output_dir <- "02_Displays/Figures/PCF_MCF"
+    output_dir <- "01_Statistics/02_Displays/Figures/PCF_MCF"
     ggsave(
       filename = file.path(output_dir, paste0("MCF_CSR_", s, ".png")),
       plot = p,

@@ -23,21 +23,21 @@ library(parallel)
 library(doParallel)
 library(foreach)
 library(Matrix)
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
+
 
 # -----------------------------------------------------------------------------
 # 1. Importing data
 # -----------------------------------------------------------------------------
-substrate_df <- read.csv("00_Data/02_Processed/CSV/substrate.csv") %>%
+substrate_df <- read.csv("01_Statistics/00_Data/02_Processed/CSV/substrate.csv") %>%
   select(Site, X, Y, Type, Essence, Diameter, Sap_max, P_Bux)
 
 # -----------------------------------------------------------------------------
 # 2. Full model based on all the data
 # -----------------------------------------------------------------------------
-out_inla <- "00_Data/03_Results/05_joint_INLA"
+out_inla <- "01_Statistics/00_Data/03_Results/05_joint_INLA"
 dir.create(out_inla, recursive = TRUE, showWarnings = FALSE)
 # Uncomment to recalculate; otherwise, load the RDS
-# source("01_R_Scripts/Functions/04_joint_INLA_fun.R")
+# source("01_Statistics/01_R_Scripts/Functions/04_joint_INLA_fun.R")
 # res <- fun_joint_inla(
 #   data = substrate_df,
 #   max.edge = c(5, 20), cutoff = 1, offset = c(10, 30),
@@ -57,7 +57,7 @@ message("N observations : ", nrow(res$data))
 # -----------------------------------------------------------------------------
 # 3. Test on 1 replicate
 # -----------------------------------------------------------------------------
-source("01_R_Scripts/Functions/05_joint_INLA_valid_fun.R")
+source("01_Statistics/01_R_Scripts/Functions/05_joint_INLA_valid_fun.R")
 cv_test <- run_parallel_cv(
   res = res,
   n_rep = 1,
@@ -77,12 +77,12 @@ print(cv_test)
 #   n_cores = 9,
 #   error_handling = "remove"
 # )
-# saveRDS(cv_results,"00_Data/03_Results/06_joint_INLA_valid/cv_results_block40m_100rep.rds")
+# saveRDS(cv_results,"01_Statistics/00_Data/03_Results/06_joint_INLA_valid/cv_results_block40m_100rep.rds")
 
 # -----------------------------------------------------------------------------
 # 5. Visualization
 # -----------------------------------------------------------------------------
-# cv_results <- readRDS("00_Data/03_Results/06_joint_INLA_valid/cv_results_block40m_100rep.rds")
+# cv_results <- readRDS("01_Statistics/00_Data/03_Results/06_joint_INLA_valid/cv_results_block40m_100rep.rds")
 #
 # ggplot(cv_results, aes(x = auc)) +
 #   geom_histogram(bins = 20, fill = "#1D9E75", color = "white", alpha = 0.8) +

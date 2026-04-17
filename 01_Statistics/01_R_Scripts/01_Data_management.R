@@ -10,12 +10,12 @@ library(dplyr)
 library(stringr)
 library(purrr)
 library(mapview)
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
+
 
 # -----------------------------------------------------------------------------
 # 1. Importing data
 # -----------------------------------------------------------------------------
-folder <- "00_Data/01_Source"
+folder <- "01_Statistics/00_Data/01_Source"
 
 # Reading function for shapefiles
 read_clean_sf <- function(path) {
@@ -97,8 +97,8 @@ substrate_df <- st_drop_geometry(substrate_shp) %>% add_l93_jitter()
 # -----------------------------------------------------------------------------
 # 4. Export
 # -----------------------------------------------------------------------------
-out_shp <- "00_Data/02_Processed/SHP"
-out_csv <- "00_Data/02_Processed/CSV"
+out_shp <- "01_Statistics/00_Data/02_Processed/SHP"
+out_csv <- "01_Statistics/00_Data/02_Processed/CSV"
 dir.create(out_shp, recursive = TRUE, showWarnings = FALSE)
 dir.create(out_csv, recursive = TRUE, showWarnings = FALSE)
 # Shapefiles (coordonnées originales conservées)

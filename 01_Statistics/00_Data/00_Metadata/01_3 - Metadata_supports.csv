@@ -1,0 +1,33 @@
+﻿Variable;Type;Signification;Modalités
+MASSIF;Qualitatif;Massif échantilloné;Alpes / Massif central / Pyrenees / Vosges
+SITE;Qualitatif;Site d'échantillonage;AN2 / AN3 / AN4 / M2 / M3 / M4 / M5 / P1 / P2 / P3 / P4 / V1 / V2 / V3 / V4
+PLACETTE;Qualitatif;Placette d'échantillonage;*SITE*_1 à *SITE*_9
+OBJ;Qualitatif;Code du support;*PLACETTE*_1  à 10
+DATE;Qualitatif;Date;aa/mm/jj
+X;Geo;Longitude du support (DD WGS84);-
+Y;Geo;Latitude du support  (DD WGS84);-
+Z;Quantitatif;Altitude du support;-
+METHODE;Qualitatif;Plan d'échantillonage Longue/Courte distance;PLD / PCD
+SUPPORT;Qualitatif;Type de support;Bois mort au sol / Souche
+ESSENCE;Qualitatif;Essence du support;Résineux / Feuillus
+CLASS_ONF;Qualitatif;Classe de taille du support (typologie ONF);TPB / PB / BM / GB / TGB
+CLASS_IGN;Qualitatif;Classe de taille du support (typologie IGN);PB / BM / GB
+DIAMETRE;Quantitatif;Diametre maximal du support (cm);-
+POSITION;Qualitatif;Position du support par rapport à la pente;-
+CONTACT;Qualitatif;Contact du support avec le sol;-
+S1;0/1;Partie du support au stade de saproxylation 1;0 / 1
+S2;0/1;Partie du support au stade de saproxylation 2;0 / 1
+S3;0/1;Partie du support au stade de saproxylation 3;0 / 1
+S4;0/1;Partie du support au stade de saproxylation 4;0 / 1
+S5;0/1;Partie du support au stade de saproxylation 5;0 / 1
+NBR_SAP;Semi-quantitatif;Nombre de stades de sproxylation différents sur le support;1 / 2 / 3 / 4 / 5
+S_MIN;Semi-quantitatif;Stade de saproxylation le moins avancé sur le support;1 / 2 / 3 / 4 / 5
+S_MAX;Semi-quantitatif;Stade de saproxylation le plus avancé sur le support;1 / 2 / 3 / 4 / 5
+SAP_I;0/1;Présence de stade de saproxylation primaire sur le support (1 à 2);0 / 1
+SAP_II;0/1;Présence de stade de saproxylation secondaire sur le support (3 à 5);0 / 1
+P_BUX;0/1;Présence/Absence de Buxbaumia;0 / 1
+TAB;0/1;Présence de Buxbaumia sur la partie tabulaire du support;0 / 1
+FLANC;0/1;Présence de Buxbaumia sur le flanc du support;0 / 1
+SECT;0/1;Présence de Buxbaumia sur la section du support;0 / 1
+EMP;0/1;Présence de Buxbaumia sur l'empattement du support;0 / 1
+HUM;0/1;Présence de Buxbaumia sur la partie humicole du support;0 / 1

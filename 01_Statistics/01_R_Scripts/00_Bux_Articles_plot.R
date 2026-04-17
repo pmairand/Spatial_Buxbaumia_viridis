@@ -2,7 +2,6 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 library(ggplot2)
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
 
 # Fetch data from OpenAlex API
 url <- "https://api.openalex.org/works?filter=title.search:Buxbaumia%20viridis&per-page=200"
@@ -29,7 +28,7 @@ ggplot(df_year, aes(x = publication_year, y = n)) +
   )
 
 # Save plot
-# output_dir <- "02_Displays/Figures"
+# output_dir <- "01_Statistics/02_Displays/Figures"
 
 # ggsave(
 #  filename = file.path(output_dir, "B_viridis_publications.png"),

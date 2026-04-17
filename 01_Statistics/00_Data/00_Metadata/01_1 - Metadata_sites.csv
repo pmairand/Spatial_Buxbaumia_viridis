@@ -1,0 +1,23 @@
+﻿Variable;Type;Signification;Modalités
+Massif;Qualitatif;Massif du site;Alpes / Massif central / Pyrenees / Vosges
+Departement;Qualitatif;Departement du site;Isère / Savoie / Cantal / Pyrénées-Atlantiques / Vosges
+Communes;Qualitatif;Commune du site;St-Pierre-de-Chartreuse / Villarodin-Bourget / Modane / Albepierre-Bredons / Borce / Urdos / Accous /Housseras / Autrey / Xonrupt-Longemer / Rochesson
+Forêts;Qualitatif;Forêt du site;Forêt domaniale de La-Grande-Chartreuse / Forêt communale de Villarodin-Bourget / Forêt communale de Modane / Forêt domaniale de Murat / Forêt communale de Borce / Forêt communale d'Accous / Forêt domaniale de Rambervillers-Autrey / Forêt domaniale de Gérardmer / Forêt domaniale de Noiregoutte
+Sites;Qualitatif;Code du site;AN2 / AN3 / AN4 / M2 / M3 / M4 / M5 / P1 / P2 / P3 / P4 / V1 / V2 / V3 / V4
+X;Geo;Longitude du site (DD WGS84);-
+Y;Geo;Latitude du site (DD WGS84);-
+Alti_moy;Quantitatif;Altitude moyenne du site;-
+Alti_min;Quantitatif;Altitude minimale du site;-
+Alti_max;Quantitatif;Altitude maximale du site;-
+Nord_moy;Quantitatif;Nordité du site = cos(degré*(pi/180));-
+Pentes_moy;Quantitatif;Pente moyenne du site;-
+Pentes_min;Quantitatif;Pente minimale du site;-
+Pentes_max;Quantitatif;Pente maximale du site;-
+Gtot;Quantitatif;Surface terrière moyenne totale par placette au site;-
+Gtot_IC95;Quantitatif;Intervalle de confiance à 95% sur la surface terrière totale moyenne au site;-
+Gbms;Quantitatif;Surface terrière moyenne des bois mort au sol par placette au site;-
+Gbms_IC95;Quantitatif;Intervalle de confiance à 95% sur la surface terrière des bois morts au sol moyenne au site;-
+GPB;Quantitatif;Surface terrière moyenne des petits bois par placette au site;-
+GBM;Quantitatif;Surface terrière moyenne des bois moyens par placette au site;-
+GGB;Quantitatif;Surface terrière moyenne des gros bois par placette au site;-
+Propo_bux;Quantitatif;Proportion moyenne de taux de supports colonisés par Buxbaumia par placette;-

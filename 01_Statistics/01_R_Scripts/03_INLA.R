@@ -23,18 +23,18 @@ library(patchwork)
 library(gtsummary)
 library(gt)
 
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
+
 
 # -----------------------------------------------------------------------------
 # 1. Importing data
 # -----------------------------------------------------------------------------
-substrate_df <- read.csv("00_Data/02_Processed/CSV/substrate.csv") %>%
+substrate_df <- read.csv("01_Statistics/00_Data/02_Processed/CSV/substrate.csv") %>%
   select(Site, X, Y, Type, Essence, Diameter, Sap_max, P_Bux)
 
 # -----------------------------------------------------------------------------
 # 2. Run GLM / INLA model
 # -----------------------------------------------------------------------------
-source("01_R_Scripts/Functions/03_INLA_fun.R")
+source("01_Statistics/01_R_Scripts/Functions/03_INLA_fun.R")
 
 result_GLM_INLA <- fun_inla(
   data = substrate_df,
@@ -44,7 +44,7 @@ result_GLM_INLA <- fun_inla(
 # -----------------------------------------------------------------------------
 # 3. Export results
 # -----------------------------------------------------------------------------
-out_inla <- "00_Data/03_Results/04_INLA"
+out_inla <- "01_Statistics/00_Data/03_Results/04_INLA"
 
 # Full result object
 saveRDS(result_GLM_INLA, file.path(out_inla, "result_GLM_INLA.rds"))
@@ -76,7 +76,7 @@ write.csv(as.data.frame(result_GLM_INLA$metrics),
 # -----------------------------------------------------------------------------
 # 4. Import results
 # -----------------------------------------------------------------------------
-result_GLM_INLA <- readRDS("00_Data/03_Results/04_INLA/result_GLM_INLA.rds")
+result_GLM_INLA <- readRDS("01_Statistics/00_Data/03_Results/04_INLA/result_GLM_INLA.rds")
 
 # -----------------------------------------------------------------------------
 # 5. Model summaries
@@ -140,8 +140,8 @@ tbl_inla
 
 # Save tables
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_glm,  "GLM_coefficients.png",  path = "02_Displays/Tables")
-# gtsave(tbl_inla, "INLA_fixed_effects.png", path = "02_Displays/Tables")
+# gtsave(tbl_glm,  "GLM_coefficients.png",  path = "01_Statistics/02_Displays/Tables")
+# gtsave(tbl_inla, "INLA_fixed_effects.png", path = "01_Statistics/02_Displays/Tables")
 
 # -----------------------------------------------------------------------------
 # 6. Spatial field visualization
@@ -155,10 +155,10 @@ for (s in names(result_GLM_INLA$spatial)) {
   print(result_GLM_INLA$spatial[[s]]$sd)
 
   if (save_inla) {
-    ggsave(file.path("02_Displays/Figures/INLA", paste0("spatial_field_mean_", s, ".png")),
+    ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", paste0("spatial_field_mean_", s, ".png")),
       plot = result_GLM_INLA$spatial[[s]]$mean, width = 8, height = 6, dpi = 300
     )
-    ggsave(file.path("02_Displays/Figures/INLA", paste0("spatial_field_sd_", s, ".png")),
+    ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", paste0("spatial_field_sd_", s, ".png")),
       plot = result_GLM_INLA$spatial[[s]]$sd, width = 8, height = 6, dpi = 300
     )
   }
@@ -235,7 +235,7 @@ tbl_moran
 
 # Save table
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_moran,  "GLM_INLA_Moran.png",  path = "02_Displays/Tables")
+# gtsave(tbl_moran,  "GLM_INLA_Moran.png",  path = "01_Statistics/02_Displays/Tables")
 
 
 # -----------------------------------------------------------------------------
@@ -276,10 +276,10 @@ print(p_glm_inla_all)
 print(p_glm_inla_site)
 
 if (save_inla) {
-  ggsave(file.path("02_Displays/Figures/INLA", "GLM_vs_INLA_all.png"),
+  ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", "GLM_vs_INLA_all.png"),
     plot = p_glm_inla_all, width = 8, height = 6, dpi = 300
   )
-  ggsave(file.path("02_Displays/Figures/INLA", "GLM_vs_INLA_by_site.png"),
+  ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", "GLM_vs_INLA_by_site.png"),
     plot = p_glm_inla_site, width = 8, height = 6, dpi = 300
   )
 }
@@ -321,10 +321,10 @@ print(p_pred_all)
 print(p_pred_sites)
 
 if (save_inla) {
-  ggsave(file.path("02_Displays/Figures/INLA", "INLA_predictions_all.png"),
+  ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", "INLA_predictions_all.png"),
     plot = p_pred_all, width = 8, height = 6, dpi = 300
   )
-  ggsave(file.path("02_Displays/Figures/INLA", "INLA_predictions_by_site.png"),
+  ggsave(file.path("01_Statistics/02_Displays/Figures/INLA", "INLA_predictions_by_site.png"),
     plot = p_pred_sites, width = 14, height = 10, dpi = 300
   )
 }

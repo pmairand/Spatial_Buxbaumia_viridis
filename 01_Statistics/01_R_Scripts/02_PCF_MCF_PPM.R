@@ -15,12 +15,12 @@ library(patchwork)
 library(ggplot2)
 library(gtsummary)
 library(gt)
-setwd("C:/Users/pm83056/OneDrive - Office National des Forets/Bureau/Spatial_Buxbaumia_viridis/01_Statistics")
+
 
 # -----------------------------------------------------------------------------
 # 1. Importing data
 # -----------------------------------------------------------------------------
-substrate_df <- read.csv("00_Data/02_Processed/CSV/substrate.csv") %>%
+substrate_df <- read.csv("01_Statistics/00_Data/02_Processed/CSV/substrate.csv") %>%
   select(Site, X, Y, Z, Type, Essence, Position, Contact, Diameter, Sap_max, P_Bux)
 
 # -----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ ggpairs(
 ) + theme_bw()
 
 # Save plot to figures folder
-# output_dir <- "02_Displays/Figures"
+# output_dir <- "01_Statistics/02_Displays/Figures"
 # ggsave(
 #  filename = file.path(output_dir, "substrate_var_correlations.png"),
 #  width = 18, height = 9, dpi = 300)
@@ -104,7 +104,7 @@ for (s in sites) {
   print(p)
 
   # Save plots
-  # output_dir <- "02_Displays/Figures"
+  # output_dir <- "01_Statistics/02_Displays/Figures"
   # ggsave(
   #  filename = file.path(output_dir, paste0("Rip-Ras_ppp_", s, ".png")),
   #  plot = p,
@@ -119,8 +119,8 @@ for (s in sites) {
 # -----------------------------------------------------------------------------
 # 5. Site-by-site PCF & MCF analysis
 # -----------------------------------------------------------------------------
-source("01_R_Scripts/Functions/01_PCF_fun.R")
-source("01_R_Scripts/Functions/02_MCF_fun.R")
+source("01_Statistics/01_R_Scripts/Functions/01_PCF_fun.R")
+source("01_Statistics/01_R_Scripts/Functions/02_MCF_fun.R")
 
 names_ppp <- c("M2_ppp", "M3_ppp", "M4_ppp", "M5_ppp")
 
@@ -158,7 +158,7 @@ make_effect_plot <- function(ef, xvar, xlab, rug_data, mean_val, sd_val) {
 # PPM loop
 results_ppm <- data.frame()
 
-output_dir <- "02_Displays/Figures/PPM"
+output_dir <- "01_Statistics/02_Displays/Figures/PPM"
 save_ppm_plots <- FALSE # Save plots in Figures folder
 
 for (s in sites) {
@@ -411,5 +411,5 @@ tbl_M4M5
 
 # Save tables
 # Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_M2M3, "results_ppm_M2M3.png", path = "02_Displays/Tables")
-# gtsave(tbl_M4M5, "results_ppm_M4M5.png", path = "02_Displays/Tables")
+# gtsave(tbl_M2M3, "results_ppm_M2M3.png", path = "01_Statistics/02_Displays/Tables")
+# gtsave(tbl_M4M5, "results_ppm_M4M5.png", path = "01_Statistics/02_Displays/Tables")
