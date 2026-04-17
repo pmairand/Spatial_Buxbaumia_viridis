@@ -1,6 +1,6 @@
 # Role of dispersal and microhabitat on the spatial distribution of a coarse wood-associated moss at the local scale
  
-**Master Thesis — Paul Mairand**  
+**Master Thesis - Paul Mairand**  
 Office National des Forêts (ONF) - 2025
 
  
@@ -23,12 +23,12 @@ Four forest plots in the **Massif Central, France** (sites M2, M3, M4, M5), cove
  
 ## Methods
  
-### Exploratory analysis — Second-order statistics
+### Exploratory analysis - Second-order statistics
  
 - **Pair Correlation Function (PCF)** : quantifies spatial aggregation of deadwood substrates relative to complete spatial randomness (CSR). Values g(r) > 1 indicate aggregation at scale r.
 - **Mark Connection Function (MCF)** : estimates the probability that two substrates at distance r are both colonised by *B. viridis*, under a random labelling null hypothesis. Departures above the simulation envelope indicate clustering of colonised substrates independent of the underlying CWD distribution.
 
-### Point Process Models — PPM / KPPM
+### Point Process Models - PPM / KPPM
  
 Inhomogeneous Poisson Point Process Models (PPM) fitted by maximum likelihood with three spatially continuous covariates:
  
@@ -39,15 +39,15 @@ $$\log \lambda(u) = \beta_0 + \beta_1 \cdot \text{dens10}(u) + \beta_2 \cdot \te
 - `sap` : substrate saproxylation stage
 An inhomogeneous **Matérn cluster process (KPPM)** was additionally fitted to test for residual spatial clustering after environmental filtering.
  
-### Joint INLA model — Bayesian spatial modelling
+### Joint INLA model - Bayesian spatial modelling
  
 A joint latent Gaussian model fitted via **INLA** (Integrated Nested Laplace Approximation) combined with the **SPDE approach**, coupling two processes through a shared spatial random field:
  
-**Process 1 — Log-Gaussian Cox Process (LGCP)** for deadwood distribution:
+**Process 1 - Log-Gaussian Cox Process (LGCP)** for deadwood distribution:
  
 $$\log \lambda_1(s) = \mu_1 + w_1(s)$$
  
-**Process 2 — Binomial model** for *B. viridis* colonisation probability:
+**Process 2 - Binomial model** for *B. viridis* colonisation probability:
  
 $$\text{logit}(p_i) = \alpha + \beta_{\text{diam}} \cdot \text{diam}_i + \beta_{\text{sapmax}} \cdot SapMAX_i + \beta_{\text{ess}} \cdot [\text{conifer}] + \beta_{\text{sup}} \cdot [\text{stump}] + \beta_s \cdot w_1(s_i) + w_2(s_i)$$
 
@@ -89,8 +89,8 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
  
 ## Main R packages
  
-- [`spatstat`](https://spatstat.org/) — point pattern analysis (PCF, MCF, PPM, KPPM)
-- [`R-INLA`](https://www.r-inla.org/) — Bayesian spatial modelling
+- [`spatstat`](https://spatstat.org/) - point pattern analysis (PCF, MCF, PPM, KPPM)
+- [`R-INLA`](https://www.r-inla.org/) - Bayesian spatial modelling
 
  
 ## Key references
