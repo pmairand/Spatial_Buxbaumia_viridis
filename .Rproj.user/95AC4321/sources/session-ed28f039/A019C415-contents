@@ -36,10 +36,8 @@ substrate_df <- read.csv("00_Data/02_Processed/CSV/substrate.csv") %>%
 # -----------------------------------------------------------------------------
 source("01_R_Scripts/Functions/03_INLA_fun.R")
 
-result_GLM_INLA <- fun_inla(
-  data = substrate_df,
-  spat_res = TRUE
-)
+result_GLM_INLA <- fun_inla(data = substrate_df,
+                            spat_res = TRUE)
 
 # -----------------------------------------------------------------------------
 # 3. Export results
@@ -51,27 +49,17 @@ saveRDS(result_GLM_INLA, file.path(out_inla, "result_GLM_INLA.rds"))
 
 # Coefficient tables
 write.csv(broom::tidy(result_GLM_INLA$glm),
-  file.path(out_inla, "coef_GLM.csv"),
-  row.names = FALSE
-)
+          file.path(out_inla, "coef_GLM.csv"), row.names = FALSE)
 write.csv(result_GLM_INLA$inla$summary.fixed,
-  file.path(out_inla, "coef_INLA_fixed.csv"),
-  row.names = TRUE
-)
+          file.path(out_inla, "coef_INLA_fixed.csv"), row.names = TRUE)
 write.csv(result_GLM_INLA$inla$summary.hyperpar,
-  file.path(out_inla, "coef_INLA_hyperpar.csv"),
-  row.names = TRUE
-)
+          file.path(out_inla, "coef_INLA_hyperpar.csv"), row.names = TRUE)
 
 # Predictions and metrics
 write.csv(result_GLM_INLA$pred,
-  file.path(out_inla, "predictions.csv"),
-  row.names = FALSE
-)
+          file.path(out_inla, "predictions.csv"), row.names = FALSE)
 write.csv(as.data.frame(result_GLM_INLA$metrics),
-  file.path(out_inla, "metrics.csv"),
-  row.names = FALSE
-)
+          file.path(out_inla, "metrics.csv"), row.names = FALSE)
 
 # -----------------------------------------------------------------------------
 # 4. Import results
@@ -85,19 +73,17 @@ summary(result_GLM_INLA$glm)
 summary(result_GLM_INLA$inla)
 
 # Prepare data for tables
-glm_df <- broom::tidy(result_GLM_INLA$glm)
-inla_fixed <- result_GLM_INLA$inla$summary.fixed
+glm_df    <- broom::tidy(result_GLM_INLA$glm) 
+inla_fixed <- result_GLM_INLA$inla$summary.fixed 
 
 # GLM coefficients table
 tbl_glm <- glm_df %>%
-  rename(
-    Term = term, Estimate = estimate, Std_Error = std.error,
-    Z_value = statistic, P_value = p.value
-  ) %>%
+  rename(Term = term, Estimate = estimate, Std_Error = std.error,
+         Z_value = statistic, P_value = p.value) %>%
   gt() %>%
   tab_header(title = "GLM coefficients") %>%
   fmt_number(columns = c(Estimate, Std_Error, Z_value), decimals = 3) %>%
-  fmt_scientific(columns = P_value, decimals = 3) %>%
+  fmt_scientific(columns = P_value, decimals = 3)%>%
   tab_style(
     style = cell_fill(color = "#f5f5f5"),
     locations = cells_body(rows = seq(1, nrow(glm_df), 2))
@@ -115,11 +101,9 @@ tbl_glm
 # INLA fixed effects table
 tbl_inla <- inla_fixed %>%
   tibble::rownames_to_column("Term") %>%
-  rename(
-    Mean = mean, SD = sd, Q025 = `0.025quant`,
-    Median = `0.5quant`, Q975 = `0.975quant`,
-    Mode = mode, KLD = kld
-  ) %>%
+  rename(Mean = mean, SD = sd, Q025 = `0.025quant`,
+         Median = `0.5quant`, Q975 = `0.975quant`,
+         Mode = mode, KLD = kld) %>%
   gt() %>%
   tab_header(title = "INLA fixed effects") %>%
   fmt_number(columns = c(Mean, SD, Q025, Median, Q975, Mode), decimals = 3) %>%
@@ -139,9 +123,9 @@ tbl_inla <- inla_fixed %>%
 tbl_inla
 
 # Save tables
-# Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_glm,  "GLM_coefficients.png",  path = "02_Displays/Tables")
-# gtsave(tbl_inla, "INLA_fixed_effects.png", path = "02_Displays/Tables")
+#Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
+#gtsave(tbl_glm,  "GLM_coefficients.png",  path = "02_Displays/Tables")
+#gtsave(tbl_inla, "INLA_fixed_effects.png", path = "02_Displays/Tables")
 
 # -----------------------------------------------------------------------------
 # 6. Spatial field visualization
@@ -153,14 +137,12 @@ save_inla <- FALSE
 for (s in names(result_GLM_INLA$spatial)) {
   print(result_GLM_INLA$spatial[[s]]$mean)
   print(result_GLM_INLA$spatial[[s]]$sd)
-
+  
   if (save_inla) {
     ggsave(file.path("02_Displays/Figures/INLA", paste0("spatial_field_mean_", s, ".png")),
-      plot = result_GLM_INLA$spatial[[s]]$mean, width = 8, height = 6, dpi = 300
-    )
+           plot = result_GLM_INLA$spatial[[s]]$mean, width = 8, height = 6, dpi = 300)
     ggsave(file.path("02_Displays/Figures/INLA", paste0("spatial_field_sd_", s, ".png")),
-      plot = result_GLM_INLA$spatial[[s]]$sd, width = 8, height = 6, dpi = 300
-    )
+           plot = result_GLM_INLA$spatial[[s]]$sd,   width = 8, height = 6, dpi = 300)
   }
 }
 
@@ -187,27 +169,17 @@ mt_inla <- moran.test(residuals_inla, lw_inla)
 
 # Moran's I results table
 moran_df <- data.frame(
-  Model = c("GLM", "INLA"),
-  Moran_I = c(
-    mt_glm$estimate["Moran I statistic"],
-    mt_inla$estimate["Moran I statistic"]
-  ),
-  Expectation = c(
-    mt_glm$estimate["Expectation"],
-    mt_inla$estimate["Expectation"]
-  ),
-  Variance = c(
-    mt_glm$estimate["Variance"],
-    mt_inla$estimate["Variance"]
-  ),
-  Z_score = c(
-    mt_glm$statistic,
-    mt_inla$statistic
-  ),
-  P_value = c(
-    mt_glm$p.value,
-    mt_inla$p.value
-  )
+  Model       = c("GLM", "INLA"),
+  Moran_I     = c(mt_glm$estimate["Moran I statistic"],
+                  mt_inla$estimate["Moran I statistic"]),
+  Expectation = c(mt_glm$estimate["Expectation"],
+                  mt_inla$estimate["Expectation"]),
+  Variance    = c(mt_glm$estimate["Variance"],
+                  mt_inla$estimate["Variance"]),
+  Z_score     = c(mt_glm$statistic,
+                  mt_inla$statistic),
+  P_value     = c(mt_glm$p.value,
+                  mt_inla$p.value)
 )
 
 tbl_moran <- moran_df %>%
@@ -234,8 +206,8 @@ tbl_moran <- moran_df %>%
 tbl_moran
 
 # Save table
-# Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-# gtsave(tbl_moran,  "GLM_INLA_Moran.png",  path = "02_Displays/Tables")
+#Sys.setenv(CHROMOTE_CHROME = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
+#gtsave(tbl_moran,  "GLM_INLA_Moran.png",  path = "02_Displays/Tables")
 
 
 # -----------------------------------------------------------------------------
@@ -243,33 +215,25 @@ tbl_moran
 # -----------------------------------------------------------------------------
 
 # All sites combined
-p_glm_inla_all <- ggplot(
-  result_GLM_INLA$pred,
-  aes(x = p_glm, y = p_inla, color = factor(P_Bux))
-) +
+p_glm_inla_all <- ggplot(result_GLM_INLA$pred,
+                         aes(x = p_glm, y = p_inla, color = factor(P_Bux))) +
   geom_point(size = 2, alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  labs(
-    title = "GLM vs INLA predicted probabilities",
-    x = "GLM predicted probability",
-    y = "INLA predicted probability",
-    color = "P_Bux"
-  ) +
+  labs(title = "GLM vs INLA predicted probabilities",
+       x = "GLM predicted probability",
+       y = "INLA predicted probability",
+       color = "P_Bux") +
   theme_minimal()
 
 # By site
-p_glm_inla_site <- ggplot(
-  result_GLM_INLA$pred,
-  aes(x = p_glm, y = p_inla, color = Site, shape = factor(P_Bux))
-) +
+p_glm_inla_site <- ggplot(result_GLM_INLA$pred,
+                          aes(x = p_glm, y = p_inla, color = Site, shape = factor(P_Bux))) +
   geom_point(size = 2, alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  labs(
-    title = "GLM vs INLA predicted probabilities - by site",
-    x = "GLM predicted probability",
-    y = "INLA predicted probability",
-    shape = "P_Bux"
-  ) +
+  labs(title = "GLM vs INLA predicted probabilities - by site",
+       x = "GLM predicted probability",
+       y = "INLA predicted probability",
+       shape = "P_Bux") +
   theme_minimal()
 
 print(p_glm_inla_all)
@@ -277,11 +241,9 @@ print(p_glm_inla_site)
 
 if (save_inla) {
   ggsave(file.path("02_Displays/Figures/INLA", "GLM_vs_INLA_all.png"),
-    plot = p_glm_inla_all, width = 8, height = 6, dpi = 300
-  )
+         plot = p_glm_inla_all, width = 8, height = 6, dpi = 300)
   ggsave(file.path("02_Displays/Figures/INLA", "GLM_vs_INLA_by_site.png"),
-    plot = p_glm_inla_site, width = 8, height = 6, dpi = 300
-  )
+         plot = p_glm_inla_site, width = 8, height = 6, dpi = 300)
 }
 
 # -----------------------------------------------------------------------------
@@ -289,17 +251,13 @@ if (save_inla) {
 # -----------------------------------------------------------------------------
 
 # All sites combined
-p_pred_all <- ggplot(
-  result_GLM_INLA$pred,
-  aes(X_loc, Y_loc, color = p_inla, shape = factor(P_Bux))
-) +
+p_pred_all <- ggplot(result_GLM_INLA$pred,
+                     aes(X_loc, Y_loc, color = p_inla, shape = factor(P_Bux))) +
   geom_point(size = 3) +
   coord_equal() +
   scale_color_viridis_c() +
-  labs(
-    title = "INLA predicted probability on substrates",
-    color = "P(BUX)", shape = "Observation"
-  ) +
+  labs(title = "INLA predicted probability on substrates",
+       color = "P(BUX)", shape = "Observation") +
   theme_minimal()
 
 # By site
@@ -309,10 +267,8 @@ plots_by_site <- map(unique(result_GLM_INLA$pred$Site), function(s) {
     geom_point(size = 2.5) +
     scale_color_viridis_c(limits = range(df_s$p_inla)) +
     coord_equal() +
-    labs(
-      title = paste("INLA predicted probability -", s),
-      color = "P(BUX)", shape = "P_Bux"
-    ) +
+    labs(title = paste("INLA predicted probability -", s),
+         color = "P(BUX)", shape = "P_Bux") +
     theme_minimal()
 })
 p_pred_sites <- wrap_plots(plots_by_site)
@@ -322,9 +278,9 @@ print(p_pred_sites)
 
 if (save_inla) {
   ggsave(file.path("02_Displays/Figures/INLA", "INLA_predictions_all.png"),
-    plot = p_pred_all, width = 8, height = 6, dpi = 300
-  )
+         plot = p_pred_all,   width = 8,  height = 6,  dpi = 300)
   ggsave(file.path("02_Displays/Figures/INLA", "INLA_predictions_by_site.png"),
-    plot = p_pred_sites, width = 14, height = 10, dpi = 300
-  )
+         plot = p_pred_sites, width = 14, height = 10, dpi = 300)
 }
+
+
