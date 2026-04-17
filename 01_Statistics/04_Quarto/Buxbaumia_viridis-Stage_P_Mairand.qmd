@@ -62,6 +62,12 @@ This species appears to be limited more by its dispersal capabilities than by ha
 Silvicultural management directly influences the species’ spatial distribution by altering the microclimate and the stock of CWD. Logging is not necessarily a threat if it maintains a sufficient volume of CWD and avoids clear-cutting, which dries out the habitat (Offerhaus et al., 2019). For example, Vottier and Vallée (2017) showed that proximity to forest roads does not negatively impact the presence or abundance of sporophytes, provided that suitable substrates are not destroyed during logging operations. Most studies conclude that effective conservation of *B.viridis* requires spatial and temporal continuity of decomposing substrates within forest stands (Kropik et al., 2020 ; Puntillo and Puntillo, 2024).
 :::
 
+## Local distribution of obligatory species
+
+::: {.callout-note title="Title idea"}
+*To be completed with a literature review*
+:::
+
 ## Bibliographic hole and objectives of the study
 
 ::: {style="text-align: justify"}
@@ -274,24 +280,23 @@ where $\alpha$ is an intercept; $\text{diam}_i$ is the standardised substrate di
 # =============================================================================
 
 fun_joint_inla <- function(
-    data,
-    # Mesh parameters
-    max.edge = c(5, 20),
-    cutoff = 1,
-    offset = c(10, 30),
-    # PC priors for w1 (deadwood spatial field)
-    prior.range1 = c(20, 0.9),
-    prior.sigma1 = c(1, 0.5),
-    # PC priors for w2 (residual Buxbaumia field)
-    prior.range2 = c(50, 0.5),
-    prior.sigma2 = c(1, 0.01)
+  data,
+  # Mesh parameters
+  max.edge = c(5, 20),
+  cutoff = 1,
+  offset = c(10, 30),
+  # PC priors for w1 (deadwood spatial field)
+  prior.range1 = c(20, 0.9),
+  prior.sigma1 = c(1, 0.5),
+  # PC priors for w2 (residual Buxbaumia field)
+  prior.range2 = c(50, 0.5),
+  prior.sigma2 = c(1, 0.01)
 ) {
-  
   # ---------------------------------------------------------------------------
   # 1. Data preparation
   # ---------------------------------------------------------------------------
   n_obs_start <- nrow(data)
-  
+
   df <- data %>%
     filter(Essence != "Indéterminé") %>%
     mutate(
@@ -302,15 +307,17 @@ fun_joint_inla <- function(
       Essence = as.factor(Essence),
       Type = as.factor(Type)
     )
-  
-  message(paste0("N observations used : ", nrow(df),
-                 " (", n_obs_start - nrow(df), " removed, ",
-                 round(100 - (nrow(df) / n_obs_start * 100), 2), "%)"))
-  
+
+  message(paste0(
+    "N observations used : ", nrow(df),
+    " (", n_obs_start - nrow(df), " removed, ",
+    round(100 - (nrow(df) / n_obs_start * 100), 2), "%)"
+  ))
+
   # Relevel : ensures consistent replicate ordering across w1 and w2
   df$Site <- relevel(df$Site, ref = "M2")
   df$Sap_max <- relevel(df$Sap_max, ref = "1")
-  
+
   # ---------------------------------------------------------------------------
   # 2. Local coordinates and site indexing
   # ---------------------------------------------------------------------------
@@ -321,12 +328,12 @@ fun_joint_inla <- function(
       Y_loc = Y - mean(Y)
     ) %>%
     ungroup()
-  
+
   df$site_id <- as.integer(df$Site)
   n_sites <- nlevels(df$Site)
   coords_loc <- as.matrix(df[, c("X_loc", "Y_loc")])
   df$row_id <- seq_len(nrow(df))
-  
+
   # ---------------------------------------------------------------------------
   # 3. Shared mesh
   # ---------------------------------------------------------------------------
@@ -338,18 +345,18 @@ fun_joint_inla <- function(
     loc = coords_loc,
     max.edge = max.edge,
     cutoff = cutoff, # observations closer than cutoff metres are merged
-                     # in the mesh to avoid overly small triangles
+    # in the mesh to avoid overly small triangles
     offset = offset # mesh extension beyond observed area to avoid
-                    # spatial field boundary effects
+    # spatial field boundary effects
   )
   n_nodes <- mesh$n
   message(paste0("Mesh : ", n_nodes, " nodes"))
-  
+
   mesh_plot <- function() {
     plot(mesh, main = "SPDE Mesh")
     points(coords_loc, col = "red", pch = 16, cex = 0.5)
   }
-  
+
   # ---------------------------------------------------------------------------
   # 4. Dual mesh - Voronoi areas (LGCP integration weights)
   # ---------------------------------------------------------------------------
@@ -358,61 +365,83 @@ fun_joint_inla <- function(
   # fm_fem() returns the FEM matrices; the diagonal of C0 gives these areas.
   fem <- fm_fem(mesh, order = 2)
   voronoi_areas <- diag(fem$c0)
-  
+
   # Peripheral mesh nodes have very large Voronoi cells (up to ~200 m²) which
   # numerically destabilise the LGCP by pushing intercept_p1 towards -Inf.
   # Areas are truncated at 5× the median — standard practice for LGCP via SPDE
   # (Simpson et al. 2016, Krainski et al. 2018).
   median_area <- median(voronoi_areas)
   voronoi_areas <- pmin(voronoi_areas, 5 * median_area)
-  
-  message(paste0("Voronoi areas : min = ", round(min(voronoi_areas), 3),
-                 " m2, max = ", round(max(voronoi_areas), 3), " m2"))
-  
+
+  message(paste0(
+    "Voronoi areas : min = ", round(min(voronoi_areas), 3),
+    " m2, max = ", round(max(voronoi_areas), 3), " m2"
+  ))
+
   # Voronoi dual mesh visualization
   voronoi_plot <- function(site_filter = NULL) {
     df_plot <- if (!is.null(site_filter)) df %>% filter(Site == site_filter) else df
-    
-    nodes_df <- data.frame(x = mesh$loc[, 1],
-                           y = mesh$loc[, 2],
-                           area = voronoi_areas)
+
+    nodes_df <- data.frame(
+      x = mesh$loc[, 1],
+      y = mesh$loc[, 2],
+      area = voronoi_areas
+    )
     # Build triangle edge segments for mesh triangulation display
-    triangles     <- mesh$graph$tv
+    triangles <- mesh$graph$tv
     segments_list <- list()
     for (i in seq_len(nrow(triangles))) {
       v <- triangles[i, ]
       pts <- mesh$loc[v, 1:2]
-      segments_list[[i]] <- data.frame(x = pts[c(1,2,3,1), 1],
-                                       y = pts[c(1,2,3,1), 2],
-                                       tri = i)
+      segments_list[[i]] <- data.frame(
+        x = pts[c(1, 2, 3, 1), 1],
+        y = pts[c(1, 2, 3, 1), 2],
+        tri = i
+      )
     }
     segs_df <- do.call(rbind, segments_list)
-    
+
     ggplot() +
       # Mesh triangulation edges
-      geom_path(data = segs_df, aes(x = x, y = y, group = tri),
-                color = "grey80", linewidth = 0.2) +
+      geom_path(
+        data = segs_df, aes(x = x, y = y, group = tri),
+        color = "grey80", linewidth = 0.2
+      ) +
       # Mesh nodes coloured by Voronoi area (= integration weight)
-      geom_point(data = nodes_df, aes(x = x, y = y, fill = area),
-                 shape = 21, size = 2, stroke = 0.3, color = "white") +
-      scale_fill_viridis_c(option = "plasma", name = "Voronoi\narea (m²)",
-                           trans = "log10") +
+      geom_point(
+        data = nodes_df, aes(x = x, y = y, fill = area),
+        shape = 21, size = 2, stroke = 0.3, color = "white"
+      ) +
+      scale_fill_viridis_c(
+        option = "plasma", name = "Voronoi\narea (m²)",
+        trans = "log10"
+      ) +
       # Observations
-      geom_point(data = df_plot, aes(x = X_loc, y = Y_loc, shape = factor(P_Bux)),
-                 color = "#1D9E75", size = 1.8, stroke = 0.8) +
-      scale_shape_manual(values = c("0" = 1, "1" = 16),
-                         labels = c("0" = "Absent", "1" = "Present"),
-                         name   = "Buxbaumia") +
+      geom_point(
+        data = df_plot, aes(x = X_loc, y = Y_loc, shape = factor(P_Bux)),
+        color = "#1D9E75", size = 1.8, stroke = 0.8
+      ) +
+      scale_shape_manual(
+        values = c("0" = 1, "1" = 16),
+        labels = c("0" = "Absent", "1" = "Present"),
+        name = "Buxbaumia"
+      ) +
       coord_equal() +
-      labs(title = paste0("Triangulation and Voronoi weights",
-                          if (!is.null(site_filter)) paste0(" — ", site_filter) else " — all sites"),
-           subtitle = paste0(n_nodes, " nodes | min = ", round(min(voronoi_areas), 1),
-                             " m² | max = ", round(max(voronoi_areas), 1), " m²"),
-           x = "X (m, centred)", y = "Y (m, centred)") +
+      labs(
+        title = paste0(
+          "Triangulation and Voronoi weights",
+          if (!is.null(site_filter)) paste0(" — ", site_filter) else " — all sites"
+        ),
+        subtitle = paste0(
+          n_nodes, " nodes | min = ", round(min(voronoi_areas), 1),
+          " m² | max = ", round(max(voronoi_areas), 1), " m²"
+        ),
+        x = "X (m, centred)", y = "Y (m, centred)"
+      ) +
       theme_minimal() +
       theme(panel.grid = element_blank(), strip.text = element_blank())
   }
-  
+
   # ---------------------------------------------------------------------------
   # 5. SPDE - two distinct spatial fields
   # ---------------------------------------------------------------------------
@@ -424,9 +453,9 @@ fun_joint_inla <- function(
     alpha = 2, # Matérn smoothness (alpha = 2 = classic Matérn)
     prior.range = prior.range1, # P(range < prior.range1[1] m) = prior.range1[2]
     prior.sigma = prior.sigma1, # P(sd > prior.sigma1[1]) = prior.sigma1[2]
-    constr = TRUE  # sum-to-zero constraint to avoid redundancy with intercept_p1
+    constr = TRUE # sum-to-zero constraint to avoid redundancy with intercept_p1
   )
-  
+
   # w2 : residual spatial field for Buxbaumia presence (Process 2 - Binomial)
   # No sum-to-zero constraint : the intercept_p2 handles the mean
   spde2 <- inla.spde2.pcmatern(
@@ -435,7 +464,7 @@ fun_joint_inla <- function(
     prior.range = prior.range2,
     prior.sigma = prior.sigma2
   )
-  
+
   # ---------------------------------------------------------------------------
   # 6. Spatial field indexing (with replicates for multi-site)
   # ---------------------------------------------------------------------------
@@ -444,7 +473,7 @@ fun_joint_inla <- function(
   idx_w1 <- inla.spde.make.index("w1", n.spde = spde1$n.spde, n.repl = n_sites)
   idx_w2 <- inla.spde.make.index("w2", n.spde = spde2$n.spde, n.repl = n_sites)
   idx_w1copy <- inla.spde.make.index("w1.copy", n.spde = spde1$n.spde, n.repl = n_sites)
-  
+
   # ---------------------------------------------------------------------------
   # 7. INLA stack construction
   #
@@ -452,34 +481,36 @@ fun_joint_inla <- function(
   #   - Mesh node rows : y_lgcp = 0 (count), y_binom = NA
   #   - Observation rows : y_lgcp = NA,       y_binom = P_Bux
   # ---------------------------------------------------------------------------
-  
+
   # --- 7a. LGCP stack (Process 1) ---
   # One row per mesh node × site.
   # y_lgcp = 0 everywhere; the latent field + Voronoi offset drives the intensity.
   # E = Voronoi area is passed as exposure (INLA internally uses log(E) as offset).
   n_nodes_total <- n_nodes * n_sites
-  
+
   # Block-diagonal A matrix : identity block per site
   A_lgcp <- Matrix::bdiag(lapply(seq_len(n_sites), function(k) Matrix::Diagonal(n = n_nodes)))
-  
+
   # Voronoi exposure weights, repeated per site
   E_lgcp <- rep(voronoi_areas, n_sites)
-  
+
   effects_lgcp <- list(
     data.frame(intercept_p1 = rep(1, n_nodes_total)),
     w1 = idx_w1
   )
-  
-  y_lgcp_resp <- cbind(y_lgcp = rep(0L, n_nodes_total),
-                       y_binom = rep(NA_integer_, n_nodes_total))
-  
+
+  y_lgcp_resp <- cbind(
+    y_lgcp = rep(0L, n_nodes_total),
+    y_binom = rep(NA_integer_, n_nodes_total)
+  )
+
   stack_lgcp <- inla.stack(
     data = list(y_joint = y_lgcp_resp, E_vec = E_lgcp),
     A = list(1, A_lgcp),
     effects = effects_lgcp,
     tag = "lgcp"
   )
-  
+
   # --- 7b. Binomial stack (Process 2) ---
   # One row per observation.
   # Two A matrices are needed : one for w1.copy (coupling), one for w2 (residual).
@@ -487,7 +518,7 @@ fun_joint_inla <- function(
   # indices for the "copy" feature to work correctly.
   A_obs_shared <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
   A_obs_w2 <- inla.spde.make.A(mesh = mesh, loc = coords_loc, repl = df$site_id)
-  
+
   # Manual dummy encoding for categorical covariates.
   # Required to ensure correct reference level identification in the presence
   # of an explicit intercept (intercept_p2) and suppressed global intercept (-1).
@@ -505,13 +536,17 @@ fun_joint_inla <- function(
       # Explicit intercept for Process 2
       intercept_p2 = 1
     ) %>%
-    select(intercept_p2, Diam_sc,
-           Sap_max2, Sap_max3, Sap_max4, Sap_max5,
-           Essence_Conifer, Type_Stump)
-  
-  y_binom_resp <- cbind(y_lgcp  = rep(NA_integer_, nrow(df)),
-                        y_binom = df$P_Bux)
-  
+    select(
+      intercept_p2, Diam_sc,
+      Sap_max2, Sap_max3, Sap_max4, Sap_max5,
+      Essence_Conifer, Type_Stump
+    )
+
+  y_binom_resp <- cbind(
+    y_lgcp = rep(NA_integer_, nrow(df)),
+    y_binom = df$P_Bux
+  )
+
   stack_binom <- inla.stack(
     data = list(y_joint = y_binom_resp, E_vec = rep(NA_real_, nrow(df))),
     # Three effect blocks :
@@ -520,14 +555,15 @@ fun_joint_inla <- function(
     #   3. w2      : residual Buxbaumia spatial field
     A = list(1, A_obs_shared, A_obs_w2),
     effects = list(effects_p2_df,
-                   w1.copy = idx_w1copy,
-                   w2 = idx_w2),
+      w1.copy = idx_w1copy,
+      w2 = idx_w2
+    ),
     tag = "binom"
   )
-  
+
   # --- 7c. Combined stack ---
   stack_joint <- inla.stack.join(stack_lgcp, stack_binom)
-  
+
   # ---------------------------------------------------------------------------
   # 8. Joint model formula
   #
@@ -538,8 +574,8 @@ fun_joint_inla <- function(
   # Prior N(0,1) on β_s encodes the assumption of weak/null coupling a priori.
   # ---------------------------------------------------------------------------
   fixed_terms_p2 <- names(effects_p2_df)
-  fixed_rhs_p2   <- paste(fixed_terms_p2, collapse = " + ")
-  
+  fixed_rhs_p2 <- paste(fixed_terms_p2, collapse = " + ")
+
   formula_joint <- as.formula(paste0(
     "y_joint ~ -1", # global intercept suppressed (explicit intercepts used)
     " + intercept_p1", # intercept for Process 1 (LGCP)
@@ -551,10 +587,10 @@ fun_joint_inla <- function(
     "                              param = c(0, 1))))",
     " + f(w2, model = spde2, replicate = w2.repl)" # w2 : residual Buxbaumia field
   ))
-  
+
   message("Joint model formula :")
   print(formula_joint)
-  
+
   # ---------------------------------------------------------------------------
   # 9. Data preparation for inla()
   #
@@ -565,21 +601,21 @@ fun_joint_inla <- function(
   # ---------------------------------------------------------------------------
   dat_inla <- inla.stack.data(stack_joint)
   A_joint <- inla.stack.A(stack_joint)
-  
+
   # Ntrials : 1 for binomial observations, NA for LGCP nodes
   Ntrials_vec <- dat_inla$y_joint[, 2]
   Ntrials_vec[!is.na(Ntrials_vec)] <- 1L
-  
+
   # E_vec : Voronoi areas for LGCP nodes; 1 for binomial rows
   # (INLA requires numeric values for E — NA not allowed, 1 is the standard convention)
   E_vec <- dat_inla$E_vec
   E_vec[is.na(E_vec)] <- 1
-  
+
   # ---------------------------------------------------------------------------
   # 10. INLA run
   # ---------------------------------------------------------------------------
   message("Running INLA...")
-  
+
   res_joint <- inla(
     formula_joint,
     family = c("poisson", "binomial"),
@@ -587,42 +623,45 @@ fun_joint_inla <- function(
     E = E_vec,
     Ntrials = Ntrials_vec,
     control.predictor = list(A = A_joint, compute = TRUE),
-    control.compute   = list(dic = TRUE,
-                             waic = TRUE,
-                             cpo = TRUE,
-                             config = TRUE),  # for posterior sampling
+    control.compute = list(
+      dic = TRUE,
+      waic = TRUE,
+      cpo = TRUE,
+      config = TRUE
+    ), # for posterior sampling
     control.inla = list(
-      int.strategy = "eb"  # empirical Bayes for speed; use "ccd" for higher accuracy
+      int.strategy = "eb" # empirical Bayes for speed; use "ccd" for higher accuracy
     ),
     verbose = FALSE
   )
-  
+
   message("INLA done.")
-  message(paste0("DIC  = ", round(res_joint$dic$dic,  2)))
+  message(paste0("DIC  = ", round(res_joint$dic$dic, 2)))
   message(paste0("WAIC = ", round(res_joint$waic$waic, 2)))
-  
+
   # ---------------------------------------------------------------------------
   # 11. Predictions at observation locations (Process 2)
   # ---------------------------------------------------------------------------
   idx_binom <- inla.stack.index(stack_joint, "binom")$data
-  
+
   df_pred <- df %>%
     mutate(
       p_buxbaumia = res_joint$summary.fitted.values[idx_binom, "mean"],
       p_bux_q025 = res_joint$summary.fitted.values[idx_binom, "0.025quant"],
       p_bux_q975 = res_joint$summary.fitted.values[idx_binom, "0.975quant"]
     )
-  
+
   # ---------------------------------------------------------------------------
   # 12. Coupling coefficient β_s extraction
   # ---------------------------------------------------------------------------
   # β_s is stored in summary.hyperpar under "Beta for w1.copy"
   beta_s_summary <- tryCatch(
     res_joint$summary.hyperpar[
-      grep("Beta for w1", rownames(res_joint$summary.hyperpar)), ],
+      grep("Beta for w1", rownames(res_joint$summary.hyperpar)),
+    ],
     error = function(e) NULL
   )
-  
+
   if (!is.null(beta_s_summary)) {
     message(paste0(
       "β_s (DW → Buxbaumia coupling) : mean = ", round(beta_s_summary$mean, 4),
@@ -630,29 +669,29 @@ fun_joint_inla <- function(
       ", ", round(beta_s_summary$`0.975quant`, 4), "]"
     ))
   }
-  
+
   # ---------------------------------------------------------------------------
   # 13. Output
   # ---------------------------------------------------------------------------
   return(list(
     # Prepared data
     data = df,
-    
+
     # Raw INLA output
     inla = res_joint,
-    
+
     # Predictions at observation locations (Process 2)
     pred = df_pred,
-    
-    # Coupling coefficient β_s 
+
+    # Coupling coefficient β_s
     beta_s = beta_s_summary,
-    
+
     # Mesh and dual mesh
     mesh = mesh,
     mesh_plot = mesh_plot,
     voronoi_plot = voronoi_plot,
     voronoi_areas = voronoi_areas,
-    
+
     # Model comparison metrics
     metrics = list(
       DIC = res_joint$dic$dic,
@@ -738,6 +777,10 @@ The spatial block cross-validation procedure follows the methodology described i
 Predictive discrimination was quantified using the Area Under the ROC Curve (AUC), computed both globally across all sites and independently within each site. Replicates yielding fewer than five test observations or a degenerate response (all absences or all presences in the test set) were discarded.
 :::
 
+::: {.callout-note title="NB"}
+*Not yet executed, awaiting confirmation of the relevance of the model structure*
+:::
+
 ::: {style="text-align: justify"}
 **INLA joint model validation function code**
 :::
@@ -747,7 +790,7 @@ Predictive discrimination was quantified using the Area Under the ROC Curve (AUC
 #| eval: false
 # -----------------------------------------------------------------------------
 # run_parallel_cv : Parallelised spatial block cross-validation
-# 
+#
 # Evaluates the predictive performance of the joint INLA model using repeated
 # spatial block holdout. At each replicate, one random point per site is drawn
 # and all substrates within a given radius are excluded from training (test set).
@@ -758,7 +801,7 @@ Predictive discrimination was quantified using the Area Under the ROC Curve (AUC
 #   res : output object from fun_joint_inla()
 #   n_rep : number of cross-validation replicates
 #   radius : exclusion radius in metres around the holdout point
-#   n_cores : number of parallel cores 
+#   n_cores : number of parallel cores
 #   error_handling : foreach error handling -> "remove" (skip) or "pass" (return error)
 #
 # Returns a data frame with one row per valid replicate :
@@ -770,20 +813,21 @@ Predictive discrimination was quantified using the Area Under the ROC Curve (AUC
 # -----------------------------------------------------------------------------
 run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
                             error_handling = "remove") {
-  
   df_full <- res$data
   df_full$Site <- factor(df_full$Site)
   sites <- levels(df_full$Site)
-  
-  message(paste0("Launching CV : ", n_rep, " replicates | ",
-                 n_cores, " cores | radius = ", radius, " m"))
-  
+
+  message(paste0(
+    "Launching CV : ", n_rep, " replicates | ",
+    n_cores, " cores | radius = ", radius, " m"
+  ))
+
   # ---------------------------------------------------------------------------
   # 1. Cluster initialisation
   # ---------------------------------------------------------------------------
   cl <- makeCluster(n_cores)
   registerDoParallel(cl)
-  
+
   # Explicit library loading on each worker
   # (INLA sometimes has namespace issues in parallel environments)
   clusterEvalQ(cl, {
@@ -795,29 +839,31 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
     library(Matrix)
     library(pROC)
   })
-  
+
   clusterExport(cl,
-                varlist = c("fun_joint_inla", "df_full", "sites", "radius"),
-                envir = environment())
-  
+    varlist = c("fun_joint_inla", "df_full", "sites", "radius"),
+    envir = environment()
+  )
+
   # ---------------------------------------------------------------------------
   # 2. Parallel loop
   # ---------------------------------------------------------------------------
   results <- foreach(
     i = 1:n_rep,
-    .packages = c("INLA", "dplyr", "tidyr", "pROC", "sf",
-                       "fmesher", "Matrix", "ggplot2"),
+    .packages = c(
+      "INLA", "dplyr", "tidyr", "pROC", "sf",
+      "fmesher", "Matrix", "ggplot2"
+    ),
     .combine = rbind,
     .errorhandling = error_handling
   ) %dopar% {
-    
     set.seed(i)
-    
+
     # --- A. Random point per site + circular exclusion ----------------------
     # One random centre is drawn per site; all points within the radius
     # are assigned to the test set
     idx_test_all <- c()
-    
+
     for (s in sites) {
       idx_site <- which(df_full$Site == s)
       coords_s <- as.matrix(df_full[idx_site, c("X", "Y")])
@@ -827,16 +873,22 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
       dists <- sqrt((coords_s[, 1] - x_rand)^2 + (coords_s[, 2] - y_rand)^2)
       idx_test_all <- c(idx_test_all, idx_site[which(dists <= radius)])
     }
-    
+
     idx_train_all <- setdiff(seq_len(nrow(df_full)), idx_test_all)
     df_train <- df_full[idx_train_all, ]
     df_test <- df_full[idx_test_all, ]
-    
+
     # Minimum size checks
-    if (nrow(df_test) < 5)   return(NULL)
-    if (nrow(df_train) < 100) return(NULL)
-    if (length(unique(df_test$P_Bux)) < 2) return(NULL)
-    
+    if (nrow(df_test) < 5) {
+      return(NULL)
+    }
+    if (nrow(df_train) < 100) {
+      return(NULL)
+    }
+    if (length(unique(df_test$P_Bux)) < 2) {
+      return(NULL)
+    }
+
     # --- B. Model re-estimation on training data ----------------------------
     res_cv <- tryCatch(
       fun_joint_inla(
@@ -847,18 +899,20 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
       ),
       error = function(e) NULL
     )
-    
-    if (is.null(res_cv)) return(NULL)
-    
+
+    if (is.null(res_cv)) {
+      return(NULL)
+    }
+
     # --- C. Prediction on test set — fixed effects only ---------------------
     # Spatial field is not extrapolated to test locations;
     # only the fixed effect linear predictor is used
     fe <- res_cv$inla$summary.fixed
-    
+
     diam_mean <- mean(df_train$Diameter, na.rm = TRUE)
-    diam_sd <- sd(df_train$Diameter,   na.rm = TRUE)
+    diam_sd <- sd(df_train$Diameter, na.rm = TRUE)
     diam_test_sc <- (df_test$Diameter - diam_mean) / diam_sd
-    
+
     lp_test <- fe["intercept_p2", "mean"] +
       fe["Diam_sc", "mean"] * diam_test_sc +
       fe["Sap_max2", "mean"] * as.integer(df_test$Sap_max == "2") +
@@ -867,26 +921,30 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
       fe["Sap_max5", "mean"] * as.integer(df_test$Sap_max == "5") +
       fe["Essence_Conifer", "mean"] * as.integer(df_test$Essence == "Résineux") +
       fe["Type_Stump", "mean"] * as.integer(df_test$Type == "Souche")
-    
+
     p_pred <- plogis(lp_test)
-    
+
     # --- D. Global AUC ------------------------------------------------------
     auc_global <- tryCatch(
       as.numeric(auc(roc(df_test$P_Bux, p_pred, quiet = TRUE))),
       error = function(e) NA_real_
     )
-    
+
     # --- E. Per-site AUC ----------------------------------------------------
     auc_by_site <- sapply(sites, function(s) {
       idx_s <- which(df_test$Site == s)
-      if (length(idx_s) < 5) return(NA_real_)
-      if (length(unique(df_test$P_Bux[idx_s])) < 2) return(NA_real_)
+      if (length(idx_s) < 5) {
+        return(NA_real_)
+      }
+      if (length(unique(df_test$P_Bux[idx_s])) < 2) {
+        return(NA_real_)
+      }
       tryCatch(
         as.numeric(auc(roc(df_test$P_Bux[idx_s], p_pred[idx_s], quiet = TRUE))),
         error = function(e) NA_real_
       )
     })
-    
+
     # --- F. Output ----------------------------------------------------------
     data.frame(
       rep = i,
@@ -899,9 +957,9 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
       auc_M5 = auc_by_site["M5"]
     )
   }
-  
+
   stopCluster(cl)
-  
+
   # ---------------------------------------------------------------------------
   # 3. Summary
   # ---------------------------------------------------------------------------
@@ -909,10 +967,10 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
     message("WARNING : no valid replicates — check errors with error_handling = 'pass'")
     return(NULL)
   }
-  
+
   message("\n=== Spatial cross-validation summary ===")
   message(paste0("Valid replicates : ", nrow(results), " / ", n_rep))
-  
+
   cat(paste0(
     "\nGlobal AUC\n",
     "  Median : ", round(median(results$auc, na.rm = TRUE), 3), "\n",
@@ -925,7 +983,7 @@ run_parallel_cv <- function(res, n_rep = 100, radius = 40, n_cores = 9,
     "  M4 : ", round(median(results$auc_M4, na.rm = TRUE), 3), "\n",
     "  M5 : ", round(median(results$auc_M5, na.rm = TRUE), 3), "\n"
   ))
-  
+
   return(results)
 }
 ```

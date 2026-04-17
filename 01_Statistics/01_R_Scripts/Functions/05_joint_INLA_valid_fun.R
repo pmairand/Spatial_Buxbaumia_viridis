@@ -3,7 +3,7 @@
 #
 # Evaluates the predictive performance of the joint INLA model using repeated
 # spatial block holdout. At each replicate, one random point per site is drawn
-# and all substrates within a given radius are excluded from training (test set).
+# and all substrates within a given radius are excluded from training.
 # The model is re-fitted on the remaining data and predictions are made on the
 # test set using fixed effects only (no spatial field extrapolation).
 #
@@ -12,7 +12,8 @@
 #   n_rep : number of cross-validation replicates
 #   radius : exclusion radius in metres around the holdout point
 #   n_cores : number of parallel cores
-#   error_handling : foreach error handling -> "remove" (skip) or "pass" (return error)
+#   error_handling : foreach error handling 
+#                    -> "remove" (skip) or "pass" (return error)
 #
 # Returns a data frame with one row per valid replicate :
 #   $rep : replicate index
