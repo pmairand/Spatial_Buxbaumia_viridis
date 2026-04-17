@@ -10,7 +10,7 @@ format:
     html-sanitize: false
 ---
 
-<https://essicolo.github.io/ecologie-mathematique-R/chapitre-git.html>
+<https://essicolo.github.io/ecologie-mathematique-R/chapitre-git.html> <https://github.com/pmairand/Spatial_Buxbaumia_viridis>
 
 # Context
 
@@ -151,6 +151,7 @@ Moreover, PPMs do not take into account categorical variables such as most of th
 :::
 
 ## Joint INLA model
+
 ### Methods
 
 ::: {style="text-align: justify"}
@@ -727,13 +728,12 @@ This result $β_s$ ≈ 0 may appear surprising, both because it contradicts the 
 
 ![](../02_Displays/Tables/spearman_coupling.png){fig-align="center" width="75%"}
 
-
 ### Spatial block cross-validation
 
 ::: {style="text-align: justify"}
 The predictive performance of the joint INLA model was assessed using a repeated spatial block holdout procedure, designed to account for the spatial autocorrelation structure of the data. Standard random cross-validation is inappropriate in spatially structured datasets because training and test observations drawn from nearby locations share autocorrelated residuals, leading to optimistic performance estimates that do not reflect genuine predictive ability at unobserved locations (Roberts *et al.*, 2017).
 
-The spatial block cross-validation procedure follows the methodology described in J.Papaïx, J-Y.Barnagaud *et al.* (unpublished) : Spatial analysis of the wildlife roadkill risk at a regional scale.At each of the 100 replicates, one random point was drawn per site, and all substrates located within a 40 m radius of that point were assigned to the test set. This exclusion radius was chosen to exceed the estimated range of the residual *B. viridis* spatial field $w_2$ (~82 m posterior mean), ensuring that test observations are spatially decoupled from the training set and that the model cannot exploit local autocorrelation to inflate predictive scores. The model was then re-estimated from scratch on the remaining training data using the same joint INLA specification (LGCP + Binomial, shared field $w_1$, residual field $w_2$), with the *ccd* integration strategy for full accuracy. Predictions on the test set were computed from fixed effects only, without extrapolating the spatial random fields to held-out locations, which would artificially borrow strength from the training spatial structure.
+The spatial block cross-validation procedure follows the methodology described in J.Papaïx, J-Y.Barnagaud *et al.* (unpublished) : Spatial analysis of the wildlife roadkill risk at a regional scale.At each of the 100 replicates, one random point was drawn per site, and all substrates located within a 40 m radius of that point were assigned to the test set. This exclusion radius was chosen to exceed the estimated range of the residual *B. viridis* spatial field $w_2$ (\~82 m posterior mean), ensuring that test observations are spatially decoupled from the training set and that the model cannot exploit local autocorrelation to inflate predictive scores. The model was then re-estimated from scratch on the remaining training data using the same joint INLA specification (LGCP + Binomial, shared field $w_1$, residual field $w_2$), with the *ccd* integration strategy for full accuracy. Predictions on the test set were computed from fixed effects only, without extrapolating the spatial random fields to held-out locations, which would artificially borrow strength from the training spatial structure.
 
 Predictive discrimination was quantified using the Area Under the ROC Curve (AUC), computed both globally across all sites and independently within each site. Replicates yielding fewer than five test observations or a degenerate response (all absences or all presences in the test set) were discarded.
 :::

@@ -1,4 +1,4 @@
-# Spatial Buxbaumia viridis
+# Role of dispersal and microhabitat on the spatial distribution of a coarse wood-associated moss at the local scale
 
 Master Thesis — Paul Mairand
 
