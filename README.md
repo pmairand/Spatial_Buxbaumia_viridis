@@ -18,7 +18,7 @@ The core question is : **does *B. viridis* simply follow the deadwood resource, 
  
 ## Study area
  
-Four forest plots in the **Massif Central, France** (sites M2, M3, M4, M5), covering montane coniferous forests with varying colonisation rates (6–22%).
+Four forest plots in the **Massif Central, France** (sites M2, M3, M4, M5), covering montane coniferous forests with varying colonisation rates (6-22%).
 
  
 ## Methods
@@ -56,9 +56,9 @@ The coupling term $\beta_s \cdot w_1(s_i)$ tests whether areas of high deadwood 
  
 ## Main results
  
-- **Deadwood** is strongly aggregated at the metric scale (r < 2–3 m) at all four sites, driven by localised tree fall events.
+- **Deadwood** is strongly aggregated at the metric scale (r < 2-3 m) at all four sites, driven by localised tree fall events.
 - **MCF** reveals independent spatial clustering of colonised substrates only at the most heavily colonised site (M3, 22%), consistent with short-distance spore dispersal or local source effects.
-- **Saproxylation stage** is the dominant driver of colonisation intensity across all sites (β = 1.60–2.67, p < 0.001).
+- **Saproxylation stage** is the dominant driver of colonisation intensity across all sites (β = 1.60-2.67, p < 0.001).
 - **KPPM** found no residual clustering after environmental filtering : the spatial pattern of *B. viridis* is fully explained by environmental covariates, with no detectable dispersal-driven contagion.
 - **Joint INLA** confirms that local deadwood density has no independent effect on colonisation probability (β_s ≈ 0) once substrate-level covariates are controlled.
 
