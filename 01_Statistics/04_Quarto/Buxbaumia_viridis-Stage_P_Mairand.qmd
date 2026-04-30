@@ -8,6 +8,9 @@ format:
     toc: true
     toc-location: left
     html-sanitize: false
+  pdf:
+    toc: true
+    number-sections: true
 ---
 
 <https://essicolo.github.io/ecologie-mathematique-R/chapitre-git.html> <https://github.com/pmairand/Spatial_Buxbaumia_viridis>

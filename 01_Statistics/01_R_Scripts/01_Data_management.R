@@ -45,7 +45,7 @@ site_shp <- site_shp %>%
   filter(M_range == "Massif central")
 
 plot_shp <- plot_shp %>%
-  select(MASSIF, SITE, PLACETTE, X, Y, ALTI) %>%
+ # select(MASSIF, SITE, PLACETTE, X, Y, ALTI) %>%
   rename(M_range = MASSIF, Site = SITE, Plot = PLACETTE, Z = ALTI) %>%
   filter(M_range == "Massif central")
 
